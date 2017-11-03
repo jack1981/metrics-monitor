@@ -18,13 +18,16 @@ public class ExceptionValue extends Value {
 	}
 	
 	@Override
-	public int compareTo(Value o) {
-		return 0;
+	public int compareTo(Value other) {
+		if(other.getAsException().isPresent())
+			return exception.equals(other.getAsException().get()) ? 0 : -1;
+		
+		return Integer.MIN_VALUE;
 	}
-	
+
 	@Override
 	public String toString() {
-		return "Exception: " + exception;
+		return "ExceptionValue [" + exception + "]";
 	}
 
 }

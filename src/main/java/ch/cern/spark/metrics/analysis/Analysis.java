@@ -1,6 +1,5 @@
 package ch.cern.spark.metrics.analysis;
 
-import java.time.Instant;
 import java.util.function.Function;
 
 import ch.cern.components.Component;
@@ -8,7 +7,6 @@ import ch.cern.components.Component.Type;
 import ch.cern.components.ComponentType;
 import ch.cern.spark.metrics.Metric;
 import ch.cern.spark.metrics.results.AnalysisResult;
-import ch.cern.spark.metrics.value.Value;
 
 @ComponentType(Type.ANAYLSIS)
 public abstract class Analysis extends Component implements Function<Metric, AnalysisResult> {
@@ -16,10 +14,17 @@ public abstract class Analysis extends Component implements Function<Metric, Ana
     private static final long serialVersionUID = -1822474093334300773L;
     
 	public final AnalysisResult apply(Metric metric) {
-		return process(metric.getInstant(), metric.getValue());
+		if(metric.getValue().getAsException().isPresent()) {
+			AnalysisResult result = new AnalysisResult(); 
+			result.setAnalyzedMetric(metric);
+			
+	        return result;
+		}
+		
+		return process(metric);
 	}
 		
-    public abstract AnalysisResult process(Instant timestamp, Value value);
+    protected abstract AnalysisResult process(Metric metric);
 	
 }
     

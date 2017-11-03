@@ -18,4 +18,8 @@ public abstract class Value implements Serializable, Cloneable, Comparable<Value
 		return Optional.empty();
 	}
 
+	public Optional<Boolean> getAsBoolean() {
+		return Optional.empty();
+	}
+
 }

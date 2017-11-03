@@ -30,7 +30,7 @@ public class Metric implements Serializable{
         if(ids == null)
             this.ids = new HashMap<String, String>();
         else
-            this.ids = ids;
+            this.ids = new HashMap<String, String>(ids);
         
         this.timestamp = timestamp;
         this.value = value;

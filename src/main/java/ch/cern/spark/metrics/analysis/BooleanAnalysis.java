@@ -6,16 +6,16 @@ import ch.cern.spark.metrics.Metric;
 import ch.cern.spark.metrics.results.AnalysisResult;
 import ch.cern.spark.metrics.value.ExceptionValue;
 
-public abstract class NumericAnalysis extends Analysis {
+public abstract class BooleanAnalysis extends Analysis {
 
     private static final long serialVersionUID = -1822474093334300773L;
 
 	@Override
 	public AnalysisResult process(Metric metric) {
-		if(!metric.getValue().getAsFloat().isPresent()) {
+		if(!metric.getValue().getAsBoolean().isPresent()) {
 			AnalysisResult result = new AnalysisResult(); 
 			
-			Exception exception = new Exception("Metric is not numeric. Current analysis requires numeric values.");
+			Exception exception = new Exception("Metric is not boolean. Current analysis requires boolean values.");
 			Metric exceptionMetric = new Metric(metric.getInstant(), new ExceptionValue(exception), metric.getIDs());
 			
 			result.setAnalyzedMetric(exceptionMetric);
@@ -23,10 +23,10 @@ public abstract class NumericAnalysis extends Analysis {
 	        return result;
 		}
 		
-		return process(metric.getInstant(), metric.getValue().getAsFloat().get());
+		return process(metric.getInstant(), metric.getValue().getAsBoolean().get());
 	}
 
-    public abstract AnalysisResult process(Instant timestamp, double value);
+    public abstract AnalysisResult process(Instant timestamp, boolean value);
 
 }
     
