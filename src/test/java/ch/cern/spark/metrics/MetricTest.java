@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 import org.spark_project.guava.collect.Sets;
 
+import ch.cern.spark.metrics.value.FloatValue;
+
 public class MetricTest {
 
     public static Metric build() {
@@ -18,7 +20,7 @@ public class MetricTest {
         ids.put("key2", "val2");
         ids.put("key3", "val3");
         
-        Metric metric = new Metric(Instant.ofEpochMilli(1000), 100, ids);
+        Metric metric = new Metric(Instant.ofEpochMilli(1000), new FloatValue(100), ids);
         
         return metric;
     }
@@ -28,9 +30,13 @@ public class MetricTest {
         Metric metric = Metric(3, 10f, "aaa=12", "bbb=15");
         
         assertEquals(3, metric.getInstant().getEpochSecond());
-        assertEquals(10f, metric.getValue(), 0f);
+        assertEquals(10f, metric.getValue().getAsFloat().get(), 0f);
         assertEquals("12", metric.getIDs().get("aaa"));
         assertEquals("15", metric.getIDs().get("bbb"));
+    }
+
+    public static Metric Metric(Instant time, float value, String... ids){
+        return Metric((int) time.getEpochSecond(), value, ids);
     }
     
     public static Metric Metric(int timeInSec, float value, String... ids){
@@ -41,7 +47,7 @@ public class MetricTest {
                         id -> id.substring(id.indexOf("=") + 1)
                     ));
         
-        return new Metric(Instant.ofEpochSecond(timeInSec), value, idsMap);
+        return new Metric(Instant.ofEpochSecond(timeInSec), new FloatValue(value), idsMap);
     }
 
 }

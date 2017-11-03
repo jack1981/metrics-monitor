@@ -53,7 +53,7 @@ public class ComputeBatchDefinedMetricsFTest {
 		status.update(state);
 		Iterator<Metric> result = func.call(new Tuple2<DefinedMetricID, DefinedMetricStore>(id, status.get()));
 		result.hasNext();
-		assertEquals(1, result.next().getValue(), 0.001f);
+		assertEquals(1, result.next().getValue().getAsFloat().get(), 0.001f);
 		
 		id = new DefinedMetricID("dmID1", new HashMap<>());
 		state = new DefinedMetricStore();
@@ -65,7 +65,7 @@ public class ComputeBatchDefinedMetricsFTest {
 		status.update(state);
 		result = func.call(new Tuple2<DefinedMetricID, DefinedMetricStore>(id, status.get()));
 		result.hasNext();
-		assertEquals(1, result.next().getValue(), 0.001f);
+		assertEquals(1, result.next().getValue().getAsFloat().get(), 0.001f);
 		
 		id = new DefinedMetricID("dmID1", new HashMap<>());
 		id = new DefinedMetricID("dmID1", new HashMap<>());
@@ -78,7 +78,7 @@ public class ComputeBatchDefinedMetricsFTest {
 		status.update(state);
 		result = func.call(new Tuple2<DefinedMetricID, DefinedMetricStore>(id, status.get()));
 		result.hasNext();
-		assertEquals(1, result.next().getValue(), 0.001f);
+		assertEquals(1, result.next().getValue().getAsFloat().get(), 0.001f);
 		
 		id = new DefinedMetricID("dmID1", new HashMap<>());
 		id = new DefinedMetricID("dmID1", new HashMap<>());
@@ -91,7 +91,7 @@ public class ComputeBatchDefinedMetricsFTest {
 		status.update(state);
 		result = func.call(new Tuple2<DefinedMetricID, DefinedMetricStore>(id, status.get()));
 		result.hasNext();
-		assertEquals(1, result.next().getValue(), 0.001f);
+		assertEquals(1, result.next().getValue().getAsFloat().get(), 0.001f);
 	}
 	
 }

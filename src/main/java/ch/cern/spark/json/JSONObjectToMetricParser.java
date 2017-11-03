@@ -96,6 +96,7 @@ public class JSONObjectToMetricParser implements FlatMapFunction<JSONObject, Met
 
     @Override
     public Iterator<Metric> call(JSONObject jsonObject) {
+    		System.out.println(jsonObject);
     		String timestamp_string = jsonObject.getProperty(timestamp_attribute);
 		Instant timestamp;
 		try {

@@ -9,14 +9,14 @@ import ch.cern.components.RegisterComponent;
 import ch.cern.properties.ConfigurationException;
 import ch.cern.properties.Properties;
 import ch.cern.spark.metrics.ValueHistory;
-import ch.cern.spark.metrics.analysis.Analysis;
+import ch.cern.spark.metrics.analysis.NumericAnalysis;
 import ch.cern.spark.metrics.results.AnalysisResult;
 import ch.cern.spark.metrics.results.AnalysisResult.Status;
 import ch.cern.spark.metrics.store.HasStore;
 import ch.cern.spark.metrics.store.Store;
 
 @RegisterComponent("percentile")
-public class PercentileAnalysis extends Analysis implements HasStore{
+public class PercentileAnalysis extends NumericAnalysis implements HasStore{
     
     private static final long serialVersionUID = 5419076430764447352L;
     

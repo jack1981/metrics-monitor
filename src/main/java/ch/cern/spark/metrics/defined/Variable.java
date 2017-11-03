@@ -60,11 +60,14 @@ public class Variable implements Predicate<Metric>{
 		return filter.test(metric);
 	}
 
-	public void updateStore(DefinedMetricStore store, Metric metric) {		
+	public void updateStore(DefinedMetricStore store, Metric metric) {	
+		if(!metric.getValue().getAsFloat().isPresent())
+			return;
+		
 		if(aggregateOperation == null)
-			store.updateValue(name, metric.getValue(), metric.getInstant());
+			store.updateValue(name, metric.getValue().getAsFloat().get(), metric.getInstant());
 		else
-			store.updateAggregatedValue(name, metric.getIDs().hashCode(), metric.getValue(), metric.getInstant());
+			store.updateAggregatedValue(name, metric.getIDs().hashCode(), metric.getValue().getAsFloat().get(), metric.getInstant());
 	}
 
 	public Optional<Double> compute(DefinedMetricStore store, Instant time) {

@@ -43,19 +43,19 @@ public class UpdateDefinedMetricStatusesFTest {
         
         metricOpt = Optional.of(Metric(0, 0f, "DB_NAME=DB1", "INSTANCE_NAME=DB1_1", "METRIC_NAME=Read"));
         Optional<Metric> result = func.call(null, id, metricOpt, status);
-        assertEquals(1, result.get().getValue(), 0.001f);
+        assertEquals(1, result.get().getValue().getAsFloat().get(), 0.001f);
 
         metricOpt = Optional.of(Metric(0, 0f, "DB_NAME=DB1", "INSTANCE_NAME=DB1_2", "METRIC_NAME=Read"));
         result = func.call(null, id, metricOpt, status);
-        assertEquals(2, result.get().getValue(), 0.001f);
+        assertEquals(2, result.get().getValue().getAsFloat().get(), 0.001f);
 
         metricOpt = Optional.of(Metric(10, 0f, "DB_NAME=DB1", "INSTANCE_NAME=DB1_1", "METRIC_NAME=Read"));
         result = func.call(null, id, metricOpt, status);
-        assertEquals(2, result.get().getValue(), 0.001f);
+        assertEquals(2, result.get().getValue().getAsFloat().get(), 0.001f);
 
         metricOpt = Optional.of(Metric(10, 0f, "DB_NAME=DB1", "INSTANCE_NAME=DB1_2", "METRIC_NAME=Read"));
         result = func.call(null, id, metricOpt, status);
-        assertEquals(2, result.get().getValue(), 0.001f);
+        assertEquals(2, result.get().getValue().getAsFloat().get(), 0.001f);
     }
 
     @Test
@@ -74,15 +74,15 @@ public class UpdateDefinedMetricStatusesFTest {
         
         metricOpt = Optional.of(Metric(0, 0f, "INSTANCE_NAME=DB1_1"));
         Optional<Metric> result = func.call(null, id, metricOpt, status);
-        assertEquals(1, result.get().getValue(), 0.001f);
+        assertEquals(1, result.get().getValue().getAsFloat().get(), 0.001f);
 
         metricOpt = Optional.of(Metric(1, 0f, "INSTANCE_NAME=DB1_1"));
         result = func.call(null, id, metricOpt, status);
-        assertEquals(2, result.get().getValue(), 0.001f);
+        assertEquals(2, result.get().getValue().getAsFloat().get(), 0.001f);
 
         metricOpt = Optional.of(Metric(2, 0f, "INSTANCE_NAME=DB1_1"));
         result = func.call(null, id, metricOpt, status);
-        assertEquals(3, result.get().getValue(), 0.001f);
+        assertEquals(3, result.get().getValue().getAsFloat().get(), 0.001f);
     }
 
     @Test
@@ -101,25 +101,25 @@ public class UpdateDefinedMetricStatusesFTest {
         
         metricOpt = Optional.of(Metric(0, 0f, "INSTANCE_NAME=DB1_1"));
         Optional<Metric> result = func.call(null, id, metricOpt, status);
-        assertEquals(1, result.get().getValue(), 0.001f);
+        assertEquals(1, result.get().getValue().getAsFloat().get(), 0.001f);
 
         metricOpt = Optional.of(Metric(2, 0f, "INSTANCE_NAME=DB1_1"));
         result = func.call(null, id, metricOpt, status);
-        assertEquals(2, result.get().getValue(), 0.001f);
+        assertEquals(2, result.get().getValue().getAsFloat().get(), 0.001f);
 
         metricOpt = Optional.of(Metric(4, 0f, "INSTANCE_NAME=DB1_1"));
         result = func.call(null, id, metricOpt, status);
-        assertEquals(3, result.get().getValue(), 0.001f);
+        assertEquals(3, result.get().getValue().getAsFloat().get(), 0.001f);
         
         //Metric at time 0 expired
         metricOpt = Optional.of(Metric(6, 0f, "INSTANCE_NAME=DB1_1"));
         result = func.call(null, id, metricOpt, status);
-        assertEquals(3, result.get().getValue(), 0.001f);
+        assertEquals(3, result.get().getValue().getAsFloat().get(), 0.001f);
         
         //Metric at time 1 expired
         metricOpt = Optional.of(Metric(8, 0f, "INSTANCE_NAME=DB1_1"));
         result = func.call(null, id, metricOpt, status);
-        assertEquals(3, result.get().getValue(), 0.001f);
+        assertEquals(3, result.get().getValue().getAsFloat().get(), 0.001f);
     }
     
 }

@@ -8,6 +8,7 @@ import ch.cern.components.Component.Type;
 import ch.cern.components.ComponentType;
 import ch.cern.spark.metrics.Metric;
 import ch.cern.spark.metrics.results.AnalysisResult;
+import ch.cern.spark.metrics.value.Value;
 
 @ComponentType(Type.ANAYLSIS)
 public abstract class Analysis extends Component implements Function<Metric, AnalysisResult> {
@@ -17,8 +18,8 @@ public abstract class Analysis extends Component implements Function<Metric, Ana
 	public final AnalysisResult apply(Metric metric) {
 		return process(metric.getInstant(), metric.getValue());
 	}
+		
+    public abstract AnalysisResult process(Instant timestamp, Value value);
 	
-    public abstract AnalysisResult process(Instant timestamp, double value);
-
 }
     

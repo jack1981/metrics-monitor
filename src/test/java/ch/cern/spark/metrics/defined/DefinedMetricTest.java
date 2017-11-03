@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import static ch.cern.spark.metrics.MetricTest.Metric;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
@@ -124,21 +126,13 @@ public class DefinedMetricTest {
 		properties.setProperty("variables.HostCPUUsagePerSec.filter.attribute.METRIC_NAME", "Host CPU Usage Per Sec");
 		definedMetric.config(properties);
 
-		Map<String, String> ids = new HashMap<>();
-		ids.put("INSTANCE_NAME", "machine");
-		Metric metric = new Metric(null, 0f, ids);
+		Metric metric = Metric(0, 0f, "INSTANCE_NAME=machine");
 		assertFalse(definedMetric.testIfApplyForAnyVariable(metric));
 		
-		ids = new HashMap<>();
-		ids.put("INSTANCE_NAME", "machine");
-		ids.put("METRIC_NAME", "Host CPU Usage Per Sec");
-		metric = new Metric(null, 0f, ids);
+		metric = Metric(0, 0f, "INSTANCE_NAME=machine", "METRIC_NAME=Host CPU Usage Per Sec");
 		assertTrue(definedMetric.testIfApplyForAnyVariable(metric));
 		
-		ids = new HashMap<>();
-		ids.put("INSTANCE_NAME", "machine");
-		ids.put("METRIC_NAME", "Not included");
-		metric = new Metric(null, 0f, ids);
+		metric = Metric(0, 0f, "INSTANCE_NAME=machine", "METRIC_NAME=Not included");
 		assertFalse(definedMetric.testIfApplyForAnyVariable(metric));
 	}
 	
@@ -150,9 +144,7 @@ public class DefinedMetricTest {
 		properties.setProperty("variables.DBCPUUsagePerSec.aggreagtion", "sum");
 		definedMetric.config(properties);
 
-		Map<String, String> ids = new HashMap<>();
-		ids.put("INSTANCE_NAME", "machine");
-		Metric metric = new Metric(null, 0f, ids);
+		Metric metric = Metric(0, 0f, "INSTANCE_NAME=machine");
 		assertTrue(definedMetric.testIfApplyForAnyVariable(metric));
 	}
 	
@@ -232,40 +224,28 @@ public class DefinedMetricTest {
 		
 		Instant now = Instant.now();
 		
-		Map<String, String> ids = new HashMap<>();
-		ids.put("HOSTNAME", "host1");
-		ids.put("TYPE", "Running");
-		Metric metric = new Metric(now, 10, ids);
+		Metric metric = Metric(now, 10f, "HOSTNAME=host1", "TYPE=Running");
 		definedMetric.updateStore(store, metric);
 		assertFalse(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).isPresent());
 		
-		ids = new HashMap<>();
-		ids.put("HOSTNAME", "host2");
-		ids.put("TYPE", "Running");
-		metric = new Metric(now.plus(Duration.ofMinutes(1)), 13, ids );
+		metric = Metric(now.plus(Duration.ofMinutes(1)), 13, "HOSTNAME=host2", "TYPE=Running");
 		definedMetric.updateStore(store, metric);
-		assertEquals(2f, definedMetric.generateByBatch(store, metric.getInstant(), new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(2f, definedMetric.generateByBatch(store, metric.getInstant(), new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("HOSTNAME", "host3");
-		ids.put("TYPE", "Running");
-		metric = new Metric(now.plus(Duration.ofMinutes(2)), 13, ids );
+		metric = Metric(now.plus(Duration.ofMinutes(2)), 13, "HOSTNAME=host3", "TYPE=Running");
 		definedMetric.updateStore(store, metric);
-		assertEquals(3f, definedMetric.generateByBatch(store, metric.getInstant(), new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(3f, definedMetric.generateByBatch(store, metric.getInstant(), new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("HOSTNAME", "host3"); // same host -> update value
-		ids.put("TYPE", "Running");
-		metric = new Metric(now.plus(Duration.ofMinutes(3)), 7, ids );
+		// same host -> update value
+		metric = Metric(now.plus(Duration.ofMinutes(3)), 7, "HOSTNAME=host3", "TYPE=Running");
 		definedMetric.updateStore(store, metric);
-		assertEquals(3f, definedMetric.generateByBatch(store, metric.getInstant(), new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(3f, definedMetric.generateByBatch(store, metric.getInstant(), new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		assertEquals(3f, definedMetric.generateByBatch(store, now.plus(Duration.ofMinutes(9)), new HashMap<String, String>()).get().getValue(), 0.001f);
-		assertEquals(3f, definedMetric.generateByBatch(store, now.plus(Duration.ofMinutes(10)), new HashMap<String, String>()).get().getValue(), 0.001f);
-		assertEquals(2f, definedMetric.generateByBatch(store, now.plus(Duration.ofMinutes(11)), new HashMap<String, String>()).get().getValue(), 0.001f);
-		assertEquals(1f, definedMetric.generateByBatch(store, now.plus(Duration.ofMinutes(12)), new HashMap<String, String>()).get().getValue(), 0.001f);
-		assertEquals(1f, definedMetric.generateByBatch(store, now.plus(Duration.ofMinutes(13)), new HashMap<String, String>()).get().getValue(), 0.001f);
-		assertEquals(0f, definedMetric.generateByBatch(store, now.plus(Duration.ofMinutes(14)), new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(3f, definedMetric.generateByBatch(store, now.plus(Duration.ofMinutes(9)), new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
+		assertEquals(2f, definedMetric.generateByBatch(store, now.plus(Duration.ofMinutes(10)), new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
+		assertEquals(1f, definedMetric.generateByBatch(store, now.plus(Duration.ofMinutes(11)), new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
+		assertEquals(1f, definedMetric.generateByBatch(store, now.plus(Duration.ofMinutes(12)), new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
+		assertEquals(0f, definedMetric.generateByBatch(store, now.plus(Duration.ofMinutes(13)), new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 	}
 	
 	@Test
@@ -274,39 +254,28 @@ public class DefinedMetricTest {
 		DefinedMetric definedMetric = new DefinedMetric("A");
 		
 		Properties properties = new Properties();
-		properties.setProperty("variables.readbytestotal.filter.attribute.METRIC_NAME", "Read Bytes");
+		properties.setProperty("variables.readbytestotal.filter.attribute.TYPE", "Read Bytes");
 		properties.setProperty("variables.readbytestotal.aggregate", "sum");
 		definedMetric.config(properties);
 		
 		DefinedMetricStore store = new DefinedMetricStore();;
 		
-		Map<String, String> ids = new HashMap<>();
-		ids.put("HOSTNAME", "host1");
-		ids.put("METRIC_NAME", "Read Bytes");
-		Metric metric = new Metric(Instant.now(), 10, ids);
+		Metric metric = Metric(Instant.now(), 10, "HOSTNAME=host1", "TYPE=Read Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(10f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(10f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("HOSTNAME", "host2");
-		ids.put("METRIC_NAME", "Read Bytes");
-		metric = new Metric(Instant.now(), 13, ids );
+		metric = Metric(Instant.now(), 13, "HOSTNAME=host2", "TYPE=Read Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(23f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(23f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("HOSTNAME", "host3");
-		ids.put("METRIC_NAME", "Read Bytes");
-		metric = new Metric(Instant.now(), 13, ids );
+		metric = Metric(Instant.now(), 13, "HOSTNAME=host3", "TYPE=Read Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(36f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(36f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("HOSTNAME", "host3"); // same host -> update value
-		ids.put("METRIC_NAME", "Read Bytes");
-		metric = new Metric(Instant.now(), 7, ids );
+		// same host -> update value
+		metric = Metric(Instant.now(), 7, "HOSTNAME=host3", "TYPE=Read Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(30f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(30f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 	}
 	
 	@Test
@@ -326,35 +295,25 @@ public class DefinedMetricTest {
 		
 		Instant now = Instant.now();
 		
-		Map<String, String> ids = new HashMap<>();
-		ids.put("METRIC_NAME", "Read Bytes");
-		Metric metric = new Metric(now, 10, ids);
+		Metric metric = Metric(now, 10, "METRIC_NAME=Read Bytes");
 		definedMetric.updateStore(store, metric);
 		assertFalse(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).isPresent());
 		
-		ids = new HashMap<>();
-		ids.put("METRIC_NAME", "Write Bytes");
-		metric = new Metric(now.plus(Duration.ofHours(20)), 7, ids );
+		metric = Metric(now.plus(Duration.ofHours(20)), 7, "METRIC_NAME=Write Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(17f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(17f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("METRIC_NAME", "Write Bytes");
-		metric = new Metric(now.plus(Duration.ofHours(40)), 8, ids );
+		metric = Metric(now.plus(Duration.ofHours(40)), 8, "METRIC_NAME=Write Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(18f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(18f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("METRIC_NAME", "Write Bytes");
-		metric = new Metric(now.plus(Duration.ofHours(60)), 9, ids );
+		metric = Metric(now.plus(Duration.ofHours(60)), 9, "METRIC_NAME=Write Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(19f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(19f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("METRIC_NAME", "Write Bytes");
-		metric = new Metric(now.plus(Duration.ofHours(80)), 10, ids );
+		metric = Metric(now.plus(Duration.ofHours(80)), 10, "METRIC_NAME=Write Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(20f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(20f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 	}
 
 	@Test
@@ -374,34 +333,24 @@ public class DefinedMetricTest {
 		
 		Instant now = Instant.now();
 		
-		Map<String, String> ids = new HashMap<>();
-		ids.put("METRIC_NAME", "Read Bytes");
-		Metric metric = new Metric(now, 10, ids);
+		Metric metric = Metric(now, 10, "METRIC_NAME=Read Bytes");
 		definedMetric.updateStore(store, metric);
 		assertFalse(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).isPresent());
 		
-		ids = new HashMap<>();
-		ids.put("METRIC_NAME", "Write Bytes");
-		metric = new Metric(now.plus(Duration.ofSeconds(20)), 7, ids );
+		metric = Metric(now.plus(Duration.ofSeconds(20)), 7, "METRIC_NAME=Write Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(17f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(17f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("METRIC_NAME", "Write Bytes");
-		metric = new Metric(now.plus(Duration.ofSeconds(40)), 8, ids );
+		metric = Metric(now.plus(Duration.ofSeconds(40)), 8, "METRIC_NAME=Write Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(18f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(18f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("METRIC_NAME", "Write Bytes");
-		metric = new Metric(now.plus(Duration.ofSeconds(60)), 9, ids );
+		metric = Metric(now.plus(Duration.ofSeconds(60)), 9, "METRIC_NAME=Write Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(19f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(19f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
 		// Read Bytes has not been updated for more than 1 minute, so has expired and computation cannot be performed
-		ids = new HashMap<>();
-		ids.put("METRIC_NAME", "Write Bytes");
-		metric = new Metric(now.plus(Duration.ofSeconds(80)), 8, ids );
+		metric = Metric(now.plus(Duration.ofSeconds(80)), 8, "METRIC_NAME=Write Bytes");
 		definedMetric.updateStore(store, metric);
 		assertFalse(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).isPresent());
 	}
@@ -421,41 +370,28 @@ public class DefinedMetricTest {
 		
 		Instant now = Instant.now();
 		
-		Map<String, String> ids = new HashMap<>();
-		ids.put("HOSTNAME", "host1");
-		ids.put("METRIC_NAME", "Read Bytes");
-		Metric metric = new Metric(now, 10, ids);
+		Metric metric = Metric(now, 10, "HOSTNAME=host1", "METRIC_NAME=Read Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(10f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(10f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("HOSTNAME", "host2");
-		ids.put("METRIC_NAME", "Read Bytes");
-		metric = new Metric(now.plus(Duration.ofSeconds(20)), 13, ids );
+		metric = Metric(now.plus(Duration.ofSeconds(20)), 13, "HOSTNAME=host2", "METRIC_NAME=Read Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(23f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(23f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("HOSTNAME", "host3");
-		ids.put("METRIC_NAME", "Read Bytes");
-		metric = new Metric(now.plus(Duration.ofSeconds(40)), 13, ids );
+		metric = Metric(now.plus(Duration.ofSeconds(40)), 13, "HOSTNAME=host3", "METRIC_NAME=Read Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(36f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(36f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("HOSTNAME", "host3"); // same host -> update value
-		ids.put("METRIC_NAME", "Read Bytes");
-		metric = new Metric(now.plus(Duration.ofSeconds(60)), 7, ids );
+		// same host -> update value
+		metric = Metric(now.plus(Duration.ofSeconds(60)), 7, "HOSTNAME=host3", "METRIC_NAME=Read Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(30f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(30f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
 		// host1 has not been updated for more than 1 minute, so his value is removed
-		ids = new HashMap<>();
-		ids.put("HOSTNAME", "host2"); // same host -> update value
-		ids.put("METRIC_NAME", "Read Bytes");
-		metric = new Metric(now.plus(Duration.ofSeconds(80)), 8, ids );
+		// same host -> update value
+		metric = Metric(now.plus(Duration.ofSeconds(80)), 8, "HOSTNAME=host2", "METRIC_NAME=Read Bytes");
 		definedMetric.updateStore(store, metric);
-		assertEquals(15f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(15f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 	}
 	
 	@Test
@@ -469,29 +405,22 @@ public class DefinedMetricTest {
 		
 		DefinedMetricStore store = new DefinedMetricStore();;
 		
-		Map<String, String> ids = new HashMap<>();
-		ids.put("HOSTNAME", "host1");
-		Metric metric = new Metric(Instant.now(), 10, ids);
+		Metric metric = Metric(0, 10, "HOSTNAME=host1");
 		definedMetric.updateStore(store, metric);
-		assertEquals(10f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(10f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("HOSTNAME", "host2");
-		metric = new Metric(Instant.now(), 13, ids );
+		metric = Metric(0, 13, "HOSTNAME=host2");
 		definedMetric.updateStore(store, metric);
-		assertEquals(23f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(23f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("HOSTNAME", "host3");
-		metric = new Metric(Instant.now(), 13, ids );
+		metric = Metric(0, 13, "HOSTNAME=host3");
 		definedMetric.updateStore(store, metric);
-		assertEquals(36f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(36f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 		
-		ids = new HashMap<>();
-		ids.put("HOSTNAME", "host3"); // same host -> update value
-		metric = new Metric(Instant.now(), 7, ids );
+		// same host -> update value
+		metric = Metric(0, 7, "HOSTNAME=host3");
 		definedMetric.updateStore(store, metric);
-		assertEquals(30f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue(), 0.001f);
+		assertEquals(30f, definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsFloat().get(), 0.001f);
 	}
 	
 	@Test
@@ -505,24 +434,16 @@ public class DefinedMetricTest {
 		
 		DefinedMetricStore store = new DefinedMetricStore();;
 		
-		Map<String, String> ids = new HashMap<>();
-		ids.put("HOSTNAME", "host1");
-		ids.put("METRIC_NAME", "Read Bytes");
-		Metric metric = new Metric(Instant.now(), 10, ids);
+		Metric metric = Metric(0, 10, "HOSTNAME=host1", "METRIC_NAME=Read Bytes");
 		definedMetric.updateStore(store, metric);
 		assertTrue(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).isPresent());
 		
-		ids = new HashMap<>();
-		ids.put("HOSTNAME", "host2");
-		ids.put("METRIC_NAME", "Read Bytes");
-		metric = new Metric(Instant.now(), 14, ids );
+		metric = Metric(Instant.now(), 14, "HOSTNAME=host2", "METRIC_NAME=Read Bytes");
 		definedMetric.updateStore(store, metric);
 		assertTrue(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).isPresent());
 		
-		ids = new HashMap<>();
-		ids.put("HOSTNAME", "host3");
-		ids.put("METRIC_NAME", "Write Bytes"); //filtered out
-		metric = new Metric(Instant.now(), 15, ids );
+		//filtered out
+		metric = Metric(Instant.now(), 15, "HOSTNAME=host3", "METRIC_NAME=Write Bytes");
 		definedMetric.updateStore(store, metric);
 		assertFalse(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).isPresent());
 	}

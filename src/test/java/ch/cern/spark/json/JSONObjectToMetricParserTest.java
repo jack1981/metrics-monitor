@@ -67,7 +67,7 @@ public class JSONObjectToMetricParserTest {
 		metrics.hasNext();
 		Metric metric = metrics.next();
 		assertEquals(1509520209883l, metric.getInstant().toEpochMilli());
-		assertEquals(2815f, metric.getValue(), 0f);
+		assertEquals(2815f, metric.getValue().getAsFloat().get(), 0f);
 		assertEquals(5, metric.getIDs().size());
 		assertEquals("data.payload.WMBS_INFO.thresholds.running_slots", metric.getIDs().get("$value_attribute"));
 		assertEquals("T2_UK_London_Brunel", metric.getIDs().get("data.payload.site_name"));
@@ -78,7 +78,7 @@ public class JSONObjectToMetricParserTest {
 		metrics.hasNext();
 		metric = metrics.next();
 		assertEquals(1509520209883l, metric.getInstant().toEpochMilli());
-		assertEquals(2111.89f, metric.getValue(), 0f);
+		assertEquals(2111.89f, metric.getValue().getAsFloat().get(), 0f);
 		assertEquals(5, metric.getIDs().size());
 		assertEquals("data.payload.WMBS_INFO.thresholds.pending_slots", metric.getIDs().get("$value_attribute"));
 		assertEquals("T2_UK_London_Brunel", metric.getIDs().get("data.payload.site_name"));
@@ -89,7 +89,7 @@ public class JSONObjectToMetricParserTest {
 		metrics.hasNext();
 		metric = metrics.next();
 		assertEquals(1509520209883l, metric.getInstant().toEpochMilli());
-		assertEquals(2111.0f, metric.getValue(), 0f);
+		assertEquals(2111.0f, metric.getValue().getAsFloat().get(), 0f);
 		assertEquals(5, metric.getIDs().size());
 		assertEquals("thresholdsGQ2LQ", metric.getIDs().get("$value_attribute"));
 		assertEquals("T2_UK_London_Brunel", metric.getIDs().get("data.payload.site_name"));
@@ -299,7 +299,7 @@ public class JSONObjectToMetricParserTest {
 		metrics.hasNext();
 		Metric metric = metrics.next();
 		assertEquals(1509520209883l, metric.getInstant().toEpochMilli());
-		assertEquals(2815f, metric.getValue(), 0f);
+		assertEquals(2815f, metric.getValue().getAsFloat().get(), 0f);
 		assertEquals(3, metric.getIDs().size());
 		assertEquals("data.payload.WMBS_INFO.thresholds.running_slots", metric.getIDs().get("$value_attribute"));
 		assertEquals("T2_UK_London_Brunel", metric.getIDs().get("data.payload.site_name"));
@@ -344,7 +344,7 @@ public class JSONObjectToMetricParserTest {
 		metrics.hasNext();
 		Metric metric = metrics.next();
 		assertEquals(1509520209883l, metric.getInstant().toEpochMilli());
-		assertEquals(2111.89f, metric.getValue(), 0f);
+		assertEquals(2111.89f, metric.getValue().getAsFloat().get(), 0f);
 		assertEquals(3, metric.getIDs().size());
 		assertEquals("data.payload.WMBS_INFO.thresholds.pending_slots", metric.getIDs().get("$value_attribute"));
 		assertEquals("T2_UK_London_Brunel", metric.getIDs().get("data.payload.site_name"));
