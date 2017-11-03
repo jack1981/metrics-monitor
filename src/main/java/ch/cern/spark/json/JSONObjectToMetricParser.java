@@ -8,24 +8,23 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.FlatMapFunction;
 
 import ch.cern.properties.ConfigurationException;
 import ch.cern.properties.Properties;
 import ch.cern.spark.Pair;
 import ch.cern.spark.metrics.Metric;
+import ch.cern.spark.metrics.value.ExceptionValue;
+import ch.cern.spark.metrics.value.FloatValue;
+import ch.cern.spark.metrics.value.Value;
 
 public class JSONObjectToMetricParser implements FlatMapFunction<JSONObject, Metric>{
-	
-	private transient final static Logger LOG = Logger.getLogger(JSONObjectToMetricParser.class.getName());
 
     private static final long serialVersionUID = -5490112720236337434L;
     
@@ -96,20 +95,6 @@ public class JSONObjectToMetricParser implements FlatMapFunction<JSONObject, Met
 
     @Override
     public Iterator<Metric> call(JSONObject jsonObject) {
-    		System.out.println(jsonObject);
-    		String timestamp_string = jsonObject.getProperty(timestamp_attribute);
-		Instant timestamp;
-		try {
-			timestamp = toDate(timestamp_string);
-		} catch (DateTimeParseException e) {
-			LOG.error("DateTimeParseException: " + e.getMessage() 
-						+ " for key " + timestamp_attribute 
-						+ " with value (" + timestamp_string + ")"
-						+ " in JSON: " + jsonObject);
-			
-			return Collections.<Metric>emptyList().iterator();
-		}
-        
 		Map<String, String> ids = new HashMap<>();
 		for(Pair<String, String> attribute : attributes) {
 			String alias = attribute.first;
@@ -121,22 +106,42 @@ public class JSONObjectToMetricParser implements FlatMapFunction<JSONObject, Met
 				ids.put(alias, value);
 		}
 		
+		Exception timestampException = null;
+    		String timestamp_string = jsonObject.getProperty(timestamp_attribute);
+		Instant timestamp;
+		try {
+			timestamp = toDate(timestamp_string);
+		} catch (DateTimeParseException e) {
+			timestampException = new Exception("DateTimeParseException: " + e.getMessage() 
+						+ " for key " + timestamp_attribute 
+						+ " with value (" + timestamp_string + ")");
+			
+			timestamp = Instant.now();
+		}
+		
 		List<Metric> metrics = new LinkedList<>();
 		for (Pair<String, String> value_attribute : value_attributes) {
 			String alias = value_attribute.first;
 			String key = value_attribute.second;
 			
-			String value_string = jsonObject.getProperty(key);
-			if(value_string == null) {
-				LOG.warn("No metric was generated for value key \"" + key + "\", "
-								+ "document does not contian such key in JSON: " + jsonObject);
-				
+			Map<String, String> metric_ids = new HashMap<>(ids);
+	        metric_ids.put("$value_attribute", alias);
+			
+			if(timestampException != null) {
+				metrics.add(new Metric(timestamp, new ExceptionValue(timestampException), metric_ids));
 				continue;
 			}
-	        float value = Float.parseFloat(value_string);
-	        
-	        Map<String, String> metric_ids = new HashMap<>(ids);
-	        metric_ids.put("$value_attribute", alias);
+			
+			String value_string = jsonObject.getProperty(key);
+			if(value_string == null) {
+				Exception exception = new Exception("No metric was generated for value key \"" + key + "\", "
+																		+ "document does not contian such key.");
+				
+				metrics.add(new Metric(timestamp, new ExceptionValue(exception), metric_ids));
+				continue;
+			}
+			
+	        Value value = FloatValue.from(value_string);
 	        
 	        metrics.add(new Metric(timestamp, value, metric_ids));
 		}

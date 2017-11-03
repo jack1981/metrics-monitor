@@ -26,9 +26,8 @@ public class KafkaMetricsSourceTest extends MetricsStreamFromKafkaProvider{
 		inputMetrics.add(new Metric(Instant.now(), (float) Math.random(), ids));
 		inputMetrics.add(new Metric(Instant.now(), (float) Math.random(), ids));
 		
-		Map<String, String> idsRemove = new HashMap<>(ids);
-		idsRemove.put("KEY_TO_REMOVE", "something");
-		inputMetrics.add(new Metric(Instant.now(), (float) Math.random(), idsRemove));
+		ids.put("KEY_TO_REMOVE", "something");
+		inputMetrics.add(new Metric(Instant.now(), (float) Math.random(), ids));
 		
 		Stream<Metric> metrics = createStream();
 

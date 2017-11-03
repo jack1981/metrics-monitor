@@ -6,6 +6,8 @@ import static ch.cern.spark.json.JSONObjectToMetricParser.TIMESTAMP_FORMAT_PARAM
 import static ch.cern.spark.json.JSONObjectToMetricParser.VALUE_ATTRIBUTES_PARAM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.text.ParseException;
@@ -213,7 +215,7 @@ public class JSONObjectToMetricParserTest {
 	}
 	
 	@Test
-	public void shouldNotParseIfTimestampHasWrongFormatInDateFormat() throws ParseException, ConfigurationException {
+	public void shouldGenerateExceptionMetricIfTimestampHasWrongFormatInDateFormat() throws ParseException, ConfigurationException {
 		Properties props = new Properties();
 		props.setProperty(TIMESTAMP_ATTRIBUTE_PARAM, "metadata.timestamp");
 		props.setProperty(TIMESTAMP_FORMAT_PARAM, "yyyy MM dd");
@@ -233,11 +235,15 @@ public class JSONObjectToMetricParserTest {
 		JSONObjectToMetricParser parser = new JSONObjectToMetricParser(props);
 		Iterator<Metric> metrics = parser.call(jsonObject);
 
+		assertTrue(metrics.hasNext());
+		Metric metric = metrics.next();
+		assertTrue(metric.getValue().getAsException().isPresent());
+		
 		assertFalse(metrics.hasNext());
 	}
 	
 	@Test
-	public void shouldNotParseIfTimestampHasWrongFormatInEpoch() throws ParseException, ConfigurationException {
+	public void shouldGenerateExceptionMetricIfTimestampHasWrongFormatInEpoch() throws ParseException, ConfigurationException {
 		Properties props = new Properties();
 		props.setProperty(TIMESTAMP_ATTRIBUTE_PARAM, "metadata.timestamp");
 		props.setProperty(TIMESTAMP_FORMAT_PARAM, "epoch-ms");
@@ -256,6 +262,13 @@ public class JSONObjectToMetricParserTest {
 		
 		JSONObjectToMetricParser parser = new JSONObjectToMetricParser(props);
 		Iterator<Metric> metrics = parser.call(jsonObject);
+
+		assertTrue(metrics.hasNext());
+		Metric metric = metrics.next();
+		assertNotNull(metric.getInstant());
+		assertTrue(metric.getValue().getAsException().isPresent());
+		assertEquals(1, metric.getIDs().size());
+		assertEquals("data.payload.WMBS_INFO.thresholds.pending_slots", metric.getIDs().get("$value_attribute"));
 
 		assertFalse(metrics.hasNext());
 	}
@@ -309,7 +322,7 @@ public class JSONObjectToMetricParserTest {
 	}
 	
 	@Test
-	public void shouldNotParseWithMissingValue() throws ParseException, ConfigurationException {
+	public void shouldGenerateExceptionMetricWhenMissingValue() throws ParseException, ConfigurationException {
 		Properties props = new Properties();
 		props.setProperty(TIMESTAMP_ATTRIBUTE_PARAM, "metadata.timestamp");
 		props.setProperty(TIMESTAMP_FORMAT_PARAM, "epoch-ms");
@@ -341,8 +354,17 @@ public class JSONObjectToMetricParserTest {
 		
 		Iterator<Metric> metrics = parser.call(jsonObject);
 		
-		metrics.hasNext();
+		assertTrue(metrics.hasNext());
 		Metric metric = metrics.next();
+		assertEquals(1509520209883l, metric.getInstant().toEpochMilli());
+		assertTrue(metric.getValue().getAsException().isPresent());
+		assertEquals(3, metric.getIDs().size());
+		assertEquals("data.payload.WMBS_INFO.thresholds.running_slots", metric.getIDs().get("$value_attribute"));
+		assertEquals("T2_UK_London_Brunel", metric.getIDs().get("data.payload.site_name"));
+		assertEquals("vocms0258.cern.ch", metric.getIDs().get("data.payload.agent_url"));
+		
+		assertTrue(metrics.hasNext());
+		metric = metrics.next();
 		assertEquals(1509520209883l, metric.getInstant().toEpochMilli());
 		assertEquals(2111.89f, metric.getValue().getAsFloat().get(), 0f);
 		assertEquals(3, metric.getIDs().size());
@@ -354,7 +376,7 @@ public class JSONObjectToMetricParserTest {
 	}
 	
 	@Test
-	public void shouldNotParseWithMissingTimestamp() throws ParseException, ConfigurationException {
+	public void shouldGenerateExceptionMetricWithMissingTimestamp() throws ParseException, ConfigurationException {
 		Properties props = new Properties();
 		props.setProperty(TIMESTAMP_ATTRIBUTE_PARAM, "metadata.timestamp");
 		props.setProperty(TIMESTAMP_FORMAT_PARAM, "epoch-ms");
@@ -385,6 +407,24 @@ public class JSONObjectToMetricParserTest {
 		JSONObject jsonObject = new JSONObject(jsonString);
 		
 		Iterator<Metric> metrics = parser.call(jsonObject);
+
+		assertTrue(metrics.hasNext());
+		Metric metric = metrics.next();
+		assertNotNull(metric.getInstant());
+		assertTrue(metric.getValue().getAsException().isPresent());
+		assertEquals(3, metric.getIDs().size());
+		assertEquals("data.payload.WMBS_INFO.thresholds.running_slots", metric.getIDs().get("$value_attribute"));
+		assertEquals("T2_UK_London_Brunel", metric.getIDs().get("data.payload.site_name"));
+		assertEquals("vocms0258.cern.ch", metric.getIDs().get("data.payload.agent_url"));
+		
+		assertTrue(metrics.hasNext());
+		metric = metrics.next();
+		assertNotNull(metric.getInstant());
+		assertTrue(metric.getValue().getAsException().isPresent());
+		assertEquals(3, metric.getIDs().size());
+		assertEquals("data.payload.WMBS_INFO.thresholds.pending_slots", metric.getIDs().get("$value_attribute"));
+		assertEquals("T2_UK_London_Brunel", metric.getIDs().get("data.payload.site_name"));
+		assertEquals("vocms0258.cern.ch", metric.getIDs().get("data.payload.agent_url"));
 
 		assertFalse(metrics.hasNext());
 	}
