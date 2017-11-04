@@ -45,7 +45,7 @@ public class BooleanValue extends Value {
 
 	@Override
 	public String toString() {
-		return "BooleanValue [" + booleanValue + "]";
+		return Boolean.toString(booleanValue);
 	}
 
 }

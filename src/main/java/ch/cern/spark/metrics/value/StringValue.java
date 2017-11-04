@@ -44,7 +44,7 @@ public class StringValue extends Value {
 
 	@Override
 	public String toString() {
-		return "StringValue [" + stringValue + "]";
+		return "\"" + stringValue + "\"";
 	}
 
 }
