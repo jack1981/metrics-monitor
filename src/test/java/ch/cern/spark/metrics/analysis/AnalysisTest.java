@@ -26,7 +26,7 @@ public class AnalysisTest {
 	
 	@Test
 	public void shouldGenerateExceptionAnalysisResultFromMetricInException() {		
-		Metric metric = new Metric(null, new ExceptionValue(new Exception()), null);
+		Metric metric = new Metric(null, new ExceptionValue(""), null);
 		AnalysisResult result = analysis.apply(metric);
 		
 		assertEquals(Status.EXCEPTION, result.getStatus());

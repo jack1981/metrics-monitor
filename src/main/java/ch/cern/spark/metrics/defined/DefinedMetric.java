@@ -14,6 +14,9 @@ import ch.cern.properties.ConfigurationException;
 import ch.cern.properties.Properties;
 import ch.cern.spark.Pair;
 import ch.cern.spark.metrics.Metric;
+import ch.cern.spark.metrics.value.AnyValue;
+import ch.cern.spark.metrics.value.ExceptionValue;
+import ch.cern.spark.metrics.value.Value;
 
 public class DefinedMetric implements Serializable{
 
@@ -55,11 +58,11 @@ public class DefinedMetric implements Serializable{
 			equation = new Equation(equationString);
 		
 		// Equation should be able to compute the result with all variables
-		Map<String, Double> valuesTest = variables.keySet().stream()
-			.map(name -> new Pair<String, Double>(name, Math.random()))
+		Map<String, Value> valuesTest = variables.keySet().stream()
+			.map(name -> new Pair<String, Value>(name, new AnyValue()))
 			.collect(Collectors.toMap(Pair::first, Pair::second));
-		Optional<Double> resultTest = equation.compute(valuesTest);
-		if(!resultTest.isPresent())
+		Value resultTest = equation.compute(valuesTest);
+		if(resultTest.getAsException().isPresent())
 			throw new ConfigurationException("Equation (value) contain variables that have not been described.");
 		
 		variablesWhen = new HashSet<String>();
@@ -112,34 +115,39 @@ public class DefinedMetric implements Serializable{
 		if(!shouldBeTrigeredByUpdate(metric))
 			return Optional.empty();
 		
-		return generate(store, metric.getInstant(), groupByMetricIDs);
+		return Optional.of(generate(store, metric.getInstant(), groupByMetricIDs));
 	}
 	
 	public Optional<Metric> generateByBatch(DefinedMetricStore store, Instant metricTime, Map<String, String> groupByMetricIDs) {
 		if(!isTriggerOnEveryBatch())
 			return Optional.empty();
 		
-		return generate(store, metricTime, groupByMetricIDs);
+		return Optional.of(generate(store, metricTime, groupByMetricIDs));
 	}
 	
-	private Optional<Metric> generate(DefinedMetricStore store, Instant metricTime, Map<String, String> groupByMetricIDs) {
-		Map<String, Double> variableValues = new HashMap<>();
+	private Metric generate(DefinedMetricStore store, Instant metricTime, Map<String, String> groupByMetricIDs) {
+		Map<String, Value> variableValues = new HashMap<>();
+		Map<String, Value> variableExceptionValues = new HashMap<>();
 		for (Variable var : variables.values()) {
-			Optional<Double> valueOpt = var.compute(store, metricTime);
+			Value value = var.compute(store, metricTime);
 			
-			valueOpt.ifPresent(value -> variableValues.put(var.getName(), value));
+			if(!value.getAsException().isPresent())
+				variableValues.put(var.getName(), value);
+			else
+				variableExceptionValues.put(var.getName(), value);
 		}
 		
-		Optional<Double> value = equation.compute(variableValues);
+		Map<String, String> metricIDs = new HashMap<>(groupByMetricIDs);
+		metricIDs.put("$defined_metric", name);
 		
-		if(value.isPresent()) {
-			Map<String, String> metricIDs = new HashMap<>(groupByMetricIDs);
-			metricIDs.put("$defined_metric", name);
+		if(variableExceptionValues.size() > 0)
+			return new Metric(metricTime, 
+								new ExceptionValue("Can not compute because there are variables with exception: " + variableExceptionValues), 
+								metricIDs);
+		
+		Value value = equation.compute(variableValues);
 			
-			return Optional.of(new Metric(metricTime, value.get().floatValue(), metricIDs ));
-		}else {
-			return Optional.empty();
-		}
+		return new Metric(metricTime, value, metricIDs);
 	}
 
 	public Optional<Map<String, String>> getGroupByMetricIDs(Map<String, String> metricIDs) {

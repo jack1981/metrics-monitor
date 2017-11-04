@@ -90,7 +90,7 @@ public class AnalysisResult implements Serializable {
     public static AnalysisResult buildTimingOut(MonitorIDMetricIDs ids, Monitor monitor, Instant time) {
         AnalysisResult result = new AnalysisResult(); 
         
-        Value value = new ExceptionValue(new Exception("Metric has timmed out."));
+        Value value = new ExceptionValue("Metric has timmed out.");
 		result.setAnalyzedMetric(new Metric(time, value , ids.getMetricIDs()));
 		
         result.addMonitorParam("name", ids.getMonitorID());

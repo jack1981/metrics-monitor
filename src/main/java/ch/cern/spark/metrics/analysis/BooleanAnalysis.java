@@ -15,8 +15,8 @@ public abstract class BooleanAnalysis extends Analysis {
 		if(!metric.getValue().getAsBoolean().isPresent()) {
 			AnalysisResult result = new AnalysisResult(); 
 			
-			Exception exception = new Exception("Metric is not boolean. Current analysis requires boolean values.");
-			Metric exceptionMetric = new Metric(metric.getInstant(), new ExceptionValue(exception), metric.getIDs());
+			ExceptionValue exception = new ExceptionValue("Metric is not boolean. Current analysis requires boolean values.");
+			Metric exceptionMetric = new Metric(metric.getInstant(), exception, metric.getIDs());
 			
 			result.setAnalyzedMetric(exceptionMetric);
 			

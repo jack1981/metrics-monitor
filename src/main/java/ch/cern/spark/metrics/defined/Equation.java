@@ -2,8 +2,11 @@ package ch.cern.spark.metrics.defined;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.regex.Pattern;
+
+import ch.cern.spark.metrics.value.ExceptionValue;
+import ch.cern.spark.metrics.value.FloatValue;
+import ch.cern.spark.metrics.value.Value;
 
 public class Equation {
 
@@ -13,15 +16,15 @@ public class Equation {
 		this.formula = equationString;
 	}
 
-	public Optional<Double> compute(Map<String, Double> values) {
+	public Value compute(Map<String, Value> values) {
 		String formulaWithValues = replaceVariables(values);
 		
 		if(canBeComputed(formulaWithValues))
-			return Optional.empty();
+			return new ExceptionValue(new Exception("Equation cannot be computed: " + formulaWithValues));
 		
 		double value = eval(formulaWithValues);
 		
-		return Optional.of(value);
+		return new FloatValue(value);
 	}
 	
 	private boolean canBeComputed(String formulaWithValues) {
@@ -34,15 +37,15 @@ public class Equation {
 		return Pattern.matches(".*[a-zA-Z]+.*", formulaWithValues);
 	}
 
-	private String replaceVariables(Map<String, Double> values) {
+	private String replaceVariables(Map<String, Value> values) {
 		if(values == null)
 			return formula;
 		
 		String formulaWithValues = formula; 
 		
-		for (Entry<String, Double> entry : values.entrySet()) {
+		for (Entry<String, Value> entry : values.entrySet()) {
 			String name = entry.getKey();
-			String value = Double.toString(entry.getValue());
+			String value = entry.getValue().toString();
 			
 			formulaWithValues = formulaWithValues.replaceAll(name, value);
 		}

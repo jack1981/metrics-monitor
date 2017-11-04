@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 import ch.cern.spark.Pair;
 import ch.cern.spark.metrics.DatedValue;
+import ch.cern.spark.metrics.value.ExceptionValue;
+import ch.cern.spark.metrics.value.FloatValue;
+import ch.cern.spark.metrics.value.Value;
 
 public class DefinedMetricStore implements Serializable{
 	
@@ -22,7 +24,7 @@ public class DefinedMetricStore implements Serializable{
 	private Map<String, DatedValue> values;
 	
 	private Map<String, Map<Integer, DatedValue>> aggregateValues;
-	private Map<String, Map<Instant, Float>> aggregateValuesForEmptyAttributes;
+	private Map<String, Map<Instant, Value>> aggregateValuesForEmptyAttributes;
 	
 	public DefinedMetricStore() {
 		values = new HashMap<>();
@@ -30,17 +32,21 @@ public class DefinedMetricStore implements Serializable{
 		aggregateValuesForEmptyAttributes = new HashMap<>();
 	}
 
-	public void updateValue(String metricID, float value, Instant instant) {
+	public void updateValue(String metricID, Value value, Instant instant) {
 		values.put(metricID, new DatedValue(instant, value));
 	}
 	
-	public Optional<Double> getValue(String name) {
-		Float value = getValues().get(name);
+	public Value getValue(String name) {
+		Value value = getValues().get(name);
 		
-		return value != null ? Optional.of(value.doubleValue()) : Optional.empty();
+		return value != null ? value : new ExceptionValue("There is no value");
 	}
 	
 	public void updateAggregatedValue(String variableName, int idHash, float value, Instant instant) {
+		updateAggregatedValue(variableName, idHash, new FloatValue(value), instant);
+	}
+	
+	public void updateAggregatedValue(String variableName, int idHash, Value value, Instant instant) {
 		if(!emptyAttrbutes(idHash)){
 		    if(!aggregateValues.containsKey(variableName))
 	            aggregateValues.put(variableName, new HashMap<>());
@@ -60,14 +66,14 @@ public class DefinedMetricStore implements Serializable{
         return idHash == 0;
     }
 
-    public Map<String, Float> getValues() {
+    public Map<String, Value> getValues() {
 		return values.entrySet().stream()
-				.map(entry -> new Pair<String, Float>(entry.getKey(), entry.getValue().getValue()))
+				.map(entry -> new Pair<String, Value>(entry.getKey(), entry.getValue().getValue()))
 				.collect(Collectors.toMap(Pair::first, Pair::second));
 	}
 	
-	public DoubleStream getAggregatedValues(String variableID) {
-	    List<Float> values = new LinkedList<>();
+	public List<Value> getAggregatedValues(String variableID) {
+	    List<Value> values = new LinkedList<>();
 	    
 		if(aggregateValues.containsKey(variableID))
 			values.addAll(aggregateValues.get(variableID).values().stream()
@@ -77,7 +83,7 @@ public class DefinedMetricStore implements Serializable{
 		if(aggregateValuesForEmptyAttributes.containsKey(variableID))
 		    values.addAll(aggregateValuesForEmptyAttributes.get(variableID).values());
 		
-		return values.stream().mapToDouble(val -> val);
+		return values;
 	}
 	
 	public List<DatedValue> getAggregatedDatedValues(String variableID) {
@@ -107,7 +113,7 @@ public class DefinedMetricStore implements Serializable{
 		if(aggregateValuesForVariable != null)
 			aggregateValuesForVariable.values().removeIf(value -> value.getInstant().isBefore(oldestUpdate));
 		
-		Map<Instant, Float> aggregateValuesForVariableWithEmptyAttributes = aggregateValuesForEmptyAttributes.get(variableID);
+		Map<Instant, Value> aggregateValuesForVariableWithEmptyAttributes = aggregateValuesForEmptyAttributes.get(variableID);
         if(aggregateValuesForVariableWithEmptyAttributes != null)
             aggregateValuesForVariableWithEmptyAttributes.keySet().removeIf(time -> time.isBefore(oldestUpdate));
 	}

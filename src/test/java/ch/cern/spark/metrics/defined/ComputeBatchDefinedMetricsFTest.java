@@ -17,6 +17,7 @@ import ch.cern.Cache;
 import ch.cern.properties.ConfigurationException;
 import ch.cern.properties.Properties;
 import ch.cern.spark.metrics.Metric;
+import ch.cern.spark.metrics.value.FloatValue;
 import scala.Tuple2;
 
 public class ComputeBatchDefinedMetricsFTest {
@@ -61,7 +62,7 @@ public class ComputeBatchDefinedMetricsFTest {
 		ids.put("DB_NAME", "DB1");
 		ids.put("INSTANCE_NAME", "DB1_2");
 		ids.put("METRIC_NAME", "Read");
-		state.updateAggregatedValue("value", ids.hashCode(), 0f, now);
+		state.updateAggregatedValue("value", ids.hashCode(), new FloatValue(0), now);
 		status.update(state);
 		result = func.call(new Tuple2<DefinedMetricID, DefinedMetricStore>(id, status.get()));
 		result.hasNext();
@@ -74,7 +75,7 @@ public class ComputeBatchDefinedMetricsFTest {
 		ids.put("DB_NAME", "DB1");
 		ids.put("INSTANCE_NAME", "DB1_1");
 		ids.put("METRIC_NAME", "Read");
-		state.updateAggregatedValue("value", ids.hashCode(), 0f, now);
+		state.updateAggregatedValue("value", ids.hashCode(), new FloatValue(0), now);
 		status.update(state);
 		result = func.call(new Tuple2<DefinedMetricID, DefinedMetricStore>(id, status.get()));
 		result.hasNext();
@@ -87,7 +88,7 @@ public class ComputeBatchDefinedMetricsFTest {
 		ids.put("DB_NAME", "DB1");
 		ids.put("INSTANCE_NAME", "DB1_2");
 		ids.put("METRIC_NAME", "Read");
-		state.updateAggregatedValue("value", ids.hashCode(), 0f, now);
+		state.updateAggregatedValue("value", ids.hashCode(), new FloatValue(0), now);
 		status.update(state);
 		result = func.call(new Tuple2<DefinedMetricID, DefinedMetricStore>(id, status.get()));
 		result.hasNext();

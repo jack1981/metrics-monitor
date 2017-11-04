@@ -110,7 +110,7 @@ public class Metric implements Serializable{
 		if (value == null) {
 			if (other.value != null)
 				return false;
-		} else if (value.compareTo(other.value) != 0)
+		} else if (!value.equals(other.value))
 			return false;
 		return true;
 	}

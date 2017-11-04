@@ -13,6 +13,7 @@ import ch.cern.spark.metrics.analysis.NumericAnalysis;
 import ch.cern.spark.metrics.results.AnalysisResult;
 import ch.cern.spark.metrics.store.HasStore;
 import ch.cern.spark.metrics.store.Store;
+import ch.cern.spark.metrics.value.FloatValue;
 
 @RegisterComponent("recent")
 public class RecentActivityAnalysis extends NumericAnalysis implements HasStore{
@@ -86,7 +87,7 @@ public class RecentActivityAnalysis extends NumericAnalysis implements HasStore{
         
         DescriptiveStatistics stats = history.getStatistics();
 
-        history.add(timestamp, (float) value);
+        history.add(timestamp, new FloatValue(value));
         
         AnalysisResult result = new AnalysisResult();
         

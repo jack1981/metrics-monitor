@@ -15,8 +15,8 @@ public abstract class NumericAnalysis extends Analysis {
 		if(!metric.getValue().getAsFloat().isPresent()) {
 			AnalysisResult result = new AnalysisResult(); 
 			
-			Exception exception = new Exception("Metric is not numeric. Current analysis requires numeric values.");
-			Metric exceptionMetric = new Metric(metric.getInstant(), new ExceptionValue(exception), metric.getIDs());
+			ExceptionValue exception = new ExceptionValue("Metric is not numeric. Current analysis requires numeric values.");
+			Metric exceptionMetric = new Metric(metric.getInstant(), exception, metric.getIDs());
 			
 			result.setAnalyzedMetric(exceptionMetric);
 			

@@ -15,8 +15,8 @@ public abstract class StringAnalysis extends Analysis {
 		if(!metric.getValue().getAsString().isPresent()) {
 			AnalysisResult result = new AnalysisResult(); 
 			
-			Exception exception = new Exception("Metric is not string. Current analysis requires string values.");
-			Metric exceptionMetric = new Metric(metric.getInstant(), new ExceptionValue(exception), metric.getIDs());
+			ExceptionValue exception = new ExceptionValue("Metric is not string. Current analysis requires string values.");
+			Metric exceptionMetric = new Metric(metric.getInstant(), exception, metric.getIDs());
 			
 			result.setAnalyzedMetric(exceptionMetric);
 			

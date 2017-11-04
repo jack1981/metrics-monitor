@@ -134,10 +134,10 @@ public class JSONObjectToMetricParser implements FlatMapFunction<JSONObject, Met
 			
 			String value_string = jsonObject.getProperty(key);
 			if(value_string == null) {
-				Exception exception = new Exception("No metric was generated for value key \"" + key + "\", "
+				ExceptionValue exception = new ExceptionValue("No metric was generated for value key \"" + key + "\", "
 																		+ "document does not contian such key.");
 				
-				metrics.add(new Metric(timestamp, new ExceptionValue(exception), metric_ids));
+				metrics.add(new Metric(timestamp, exception, metric_ids));
 				continue;
 			}
 			

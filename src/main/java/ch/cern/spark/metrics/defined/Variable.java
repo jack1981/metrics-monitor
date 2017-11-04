@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 import org.apache.kafka.common.config.ConfigException;
 
@@ -16,6 +17,9 @@ import ch.cern.spark.Pair;
 import ch.cern.spark.metrics.DatedValue;
 import ch.cern.spark.metrics.Metric;
 import ch.cern.spark.metrics.filter.MetricsFilter;
+import ch.cern.spark.metrics.value.ExceptionValue;
+import ch.cern.spark.metrics.value.FloatValue;
+import ch.cern.spark.metrics.value.Value;
 
 public class Variable implements Predicate<Metric>{
 
@@ -61,66 +65,116 @@ public class Variable implements Predicate<Metric>{
 	}
 
 	public void updateStore(DefinedMetricStore store, Metric metric) {	
-		if(!metric.getValue().getAsFloat().isPresent())
-			return;
-		
 		if(aggregateOperation == null)
-			store.updateValue(name, metric.getValue().getAsFloat().get(), metric.getInstant());
+			store.updateValue(name, metric.getValue(), metric.getInstant());
 		else
-			store.updateAggregatedValue(name, metric.getIDs().hashCode(), metric.getValue().getAsFloat().get(), metric.getInstant());
+			store.updateAggregatedValue(name, metric.getIDs().hashCode(), metric.getValue(), metric.getInstant());
 	}
 
-	public Optional<Double> compute(DefinedMetricStore store, Instant time) {
+	public Value compute(DefinedMetricStore store, Instant time) {
 		Optional<Instant> oldestUpdate = Optional.empty();
 		if(expirePeriod != null)
 			oldestUpdate = Optional.of(time.minus(expirePeriod));
 		store.purge(name, oldestUpdate);
 		
+		Value val = null;
 		if(aggregateOperation == null)
-			return store.getValue(name);
+			val = store.getValue(name);
+		else
+			switch (aggregateOperation) {
+			case SUM:
+				val = sumAggregation(store.getAggregatedValues(name));
+				break;
+			case COUNT:
+				val = new FloatValue(store.getAggregatedValues(name).size());
+				break;
+			case AVG:
+				val = averageAggregation(store.getAggregatedValues(name));
+				break;
+			case WEIGHTED_AVG:
+				val = weightedAverageAggregation(store.getAggregatedDatedValues(name), time);
+				break;
+			case MIN:
+				val = minAggregation(store.getAggregatedValues(name));
+				break;
+			case MAX:
+				val = maxAggregation(store.getAggregatedValues(name));
+				break;
+			case DIFF:
+				val = differenceAggregation(store.getAggregatedDatedValues(name));
+				break;
+			default:
+				val = new ExceptionValue("Agreggation operation (" + aggregateOperation + ") is not available.");
+				break;
+			}
 		
-		OptionalDouble val = null;
-		switch (aggregateOperation) {
-		case SUM:
-			return Optional.of(store.getAggregatedValues(name).sum());
-		case COUNT:
-			return Optional.of((double) store.getAggregatedValues(name).count());
-		case AVG:
-			val = store.getAggregatedValues(name).average();
-			break;
-		case WEIGHTED_AVG:
-			return weightedAverageAggregation(store.getAggregatedDatedValues(name), time);
-		case MIN:
-			val = store.getAggregatedValues(name).min();
-			break;
-		case MAX:
-			val = store.getAggregatedValues(name).max();
-			break;
-		case DIFF:
-			return differenceAggregation(store.getAggregatedDatedValues(name));
-		default:
-			throw new RuntimeException("Operation not implemented");
-		}
+		if(val.getAsException().isPresent())
+			val = new ExceptionValue("Variable (" + name + "): " + val.getAsException().get().getMessage());
 		
-		return val.isPresent() ? Optional.of(val.getAsDouble()) : Optional.empty();
+		return val;
 	}
 
-	private Optional<Double> weightedAverageAggregation(List<DatedValue> values, Instant time) {
-        Optional<Pair<Double, Double>> pairSum = values.stream()
+	private Value averageAggregation(List<Value> aggregatedValues) {
+		DoubleStream doubleStream = toDoubleStream(aggregatedValues);
+		
+		OptionalDouble average = doubleStream.average();
+		
+		if(average.isPresent())
+			return new FloatValue(average.getAsDouble());
+		else
+			return new ExceptionValue("Average aggregation: no float values.");
+	}
+	
+	private Value minAggregation(List<Value> aggregatedValues) {
+		DoubleStream doubleStream = toDoubleStream(aggregatedValues);
+		
+		OptionalDouble average = doubleStream.min();
+		
+		if(average.isPresent())
+			return new FloatValue(average.getAsDouble());
+		else
+			return new ExceptionValue("Minimum aggregation: no float values.");
+	}
+	
+	private Value maxAggregation(List<Value> aggregatedValues) {
+		DoubleStream doubleStream = toDoubleStream(aggregatedValues);
+		
+		OptionalDouble average = doubleStream.max();
+		
+		if(average.isPresent())
+			return new FloatValue(average.getAsDouble());
+		else
+			return new ExceptionValue("Maximum aggregation: no float values.");
+	}
+
+	private FloatValue sumAggregation(List<Value> aggregatedValues) {
+		DoubleStream doubleStream = toDoubleStream(aggregatedValues);
+		
+		return new FloatValue(doubleStream.sum());
+	}
+
+	private DoubleStream toDoubleStream(List<Value> aggregatedValues) {
+		return aggregatedValues.stream()
+				.filter(val -> val.getAsFloat().isPresent())
+				.mapToDouble(val -> val.getAsFloat().get());
+	}
+
+	private Value weightedAverageAggregation(List<DatedValue> values, Instant time) {
+        Optional<Pair<Double, Double>> pairSum = values.stream().filter(value -> value.getValue().getAsFloat().isPresent())
 				.map(value -> {
 					double weight = computeWeight(time, value.getInstant());
 			    	
-		    		return new Pair<Double, Double>(weight, weight * value.getValue());
+		    		return new Pair<Double, Double>(weight, weight * value.getValue().getAsFloat().get());
 				})
 				.reduce((p1, p2) -> new Pair<Double, Double>(p1.first + p2.first, p1.second + p2.second));
 
 		if(!pairSum.isPresent())
-			return Optional.empty();
+			return new ExceptionValue("Weighted average aggregation: there are no float values to comute.");
 		
 		double totalWeights = pairSum.get().first;
 		double weightedValues = pairSum.get().second;
 		
-		return Optional.of(weightedValues / totalWeights);
+		return new FloatValue(weightedValues / totalWeights);
 	}
 
     private float computeWeight(Instant time, Instant metric_timestamp) {
@@ -132,13 +186,19 @@ public class Variable implements Predicate<Metric>{
         return (float) (expirePeriod.getSeconds() - time_difference.getSeconds()) / (float) expirePeriod.getSeconds();
     }
     
-	private Optional<Double> differenceAggregation(List<DatedValue> aggregatedDatedValues) {
+	private Value differenceAggregation(List<DatedValue> aggregatedDatedValues) {
 		if(aggregatedDatedValues.size() < 2) {
-			return Optional.empty();
+			return new ExceptionValue("Difference aggregation: there is no previous value.");
 		}else {
-			List<DatedValue> sorted = aggregatedDatedValues.stream().sorted().collect(Collectors.toList());
+			List<DatedValue> sorted = aggregatedDatedValues.stream()
+												.filter(value -> value.getValue().getAsFloat().isPresent())
+												.sorted()
+												.collect(Collectors.toList());
 			
-			return Optional.of((double) (sorted.get(sorted.size() - 1).getValue() - sorted.get(sorted.size() - 2).getValue()));
+			Float lastValue = sorted.get(sorted.size() - 1).getValue().getAsFloat().get();
+			Float previousValue = sorted.get(sorted.size() - 2).getValue().getAsFloat().get();
+
+			return new FloatValue(lastValue - previousValue);
 		}
 	}
 	

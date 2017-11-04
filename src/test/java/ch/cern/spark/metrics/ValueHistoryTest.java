@@ -21,6 +21,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import ch.cern.spark.metrics.ValueHistory.Store_;
+import ch.cern.spark.metrics.value.FloatValue;
+import ch.cern.spark.metrics.value.Value;
 import ch.cern.utils.TimeUtils;
 
 public class ValueHistoryTest {
@@ -93,9 +95,9 @@ public class ValueHistoryTest {
         
         history.purge(TimeUtils.toInstant("2017-04-01 11:20:22"));
         
-        List<Float> returnedValues = history.getDatedValues().stream().map(value -> value.getValue()).collect(Collectors.toList());
+        List<Value> returnedValues = history.getDatedValues().stream().map(value -> value.getValue()).collect(Collectors.toList());
         
-        List<Float> expected = Arrays.asList(12f, 13f, 14f);
+        List<FloatValue> expected = Arrays.asList(new FloatValue(12f), new FloatValue(13f), new FloatValue(14f));
         
         Assert.assertEquals(expected, returnedValues);
     }
@@ -111,9 +113,9 @@ public class ValueHistoryTest {
         history.add(TimeUtils.toInstant("2017-04-01 11:20:01"), 13f);
         history.add(TimeUtils.toInstant("2017-04-01 11:20:10"), 14f);
         
-        List<Float> returnedValues = history.getHourlyValues(TimeUtils.toInstant("2017-04-01 10:20:02"));
+        List<Value> returnedValues = history.getHourlyValues(TimeUtils.toInstant("2017-04-01 10:20:02"));
         
-        List<Float> expected = Arrays.asList(9f, 10f, 13f, 14f);
+        List<FloatValue> expected = Arrays.asList(new FloatValue(9f), new FloatValue(10f), new FloatValue(13f), new FloatValue(14f));
         
         Assert.assertEquals(expected, returnedValues);
     }
@@ -129,9 +131,9 @@ public class ValueHistoryTest {
         history.add(TimeUtils.toInstant("2017-04-09 10:20:01"), 13f);
         history.add(TimeUtils.toInstant("2017-04-10 11:20:10"), 14f);
         
-        List<Float> returnedValues = history.getDaylyValues(TimeUtils.toInstant("2017-04-01 10:20:02"));
+        List<Value> returnedValues = history.getDaylyValues(TimeUtils.toInstant("2017-04-01 10:20:02"));
         
-        List<Float> expected = Arrays.asList(9f, 10f, 13f);
+        List<FloatValue> expected = Arrays.asList(new FloatValue(9f), new FloatValue(10f), new FloatValue(13f));
         
         Assert.assertEquals(expected, returnedValues);
     }
@@ -147,9 +149,9 @@ public class ValueHistoryTest {
         history.add(TimeUtils.toInstant("2017-04-10 10:20:01"), 13f);
         history.add(TimeUtils.toInstant("2017-04-17 11:20:10"), 14f);
         
-        List<Float> returnedValues = history.getWeeklyValues(TimeUtils.toInstant("2017-04-17 10:20:02"));
+        List<Value> returnedValues = history.getWeeklyValues(TimeUtils.toInstant("2017-04-17 10:20:02"));
         
-        List<Float> expected = Arrays.asList(10f, 13f);
+        List<FloatValue> expected = Arrays.asList(new FloatValue(10f), new FloatValue(13f));
         
         Assert.assertEquals(expected, returnedValues);
     }

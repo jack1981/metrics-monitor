@@ -20,13 +20,27 @@ public class FloatValue extends Value {
 	public Optional<Float> getAsFloat() {
 		return Optional.of(floatValue);
 	}
-	
+
 	@Override
-	public int compareTo(Value other) {
-		if(other.getAsFloat().isPresent())
-			return Float.compare(floatValue, other.getAsFloat().get());
-		
-		return Integer.MIN_VALUE;
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Float.floatToIntBits(floatValue);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FloatValue other = (FloatValue) obj;
+		if (Float.floatToIntBits(floatValue) != Float.floatToIntBits(other.floatValue))
+			return false;
+		return true;
 	}
 
 	public static FloatValue from(String value_string) {
@@ -35,7 +49,7 @@ public class FloatValue extends Value {
 
 	@Override
 	public String toString() {
-		return "FloatValue [" + floatValue + "]";
+		return Float.toString(floatValue);
 	}
 
 }

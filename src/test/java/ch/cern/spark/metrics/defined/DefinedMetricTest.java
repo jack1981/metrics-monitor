@@ -297,7 +297,8 @@ public class DefinedMetricTest {
 		
 		Metric metric = Metric(now, 10, "METRIC_NAME=Read Bytes");
 		definedMetric.updateStore(store, metric);
-		assertFalse(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).isPresent());
+		assertTrue(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).isPresent());
+		assertTrue(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsException().isPresent());
 		
 		metric = Metric(now.plus(Duration.ofHours(20)), 7, "METRIC_NAME=Write Bytes");
 		definedMetric.updateStore(store, metric);
@@ -335,7 +336,8 @@ public class DefinedMetricTest {
 		
 		Metric metric = Metric(now, 10, "METRIC_NAME=Read Bytes");
 		definedMetric.updateStore(store, metric);
-		assertFalse(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).isPresent());
+		assertTrue(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).isPresent());
+		assertTrue(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsException().isPresent());
 		
 		metric = Metric(now.plus(Duration.ofSeconds(20)), 7, "METRIC_NAME=Write Bytes");
 		definedMetric.updateStore(store, metric);
@@ -352,7 +354,8 @@ public class DefinedMetricTest {
 		// Read Bytes has not been updated for more than 1 minute, so has expired and computation cannot be performed
 		metric = Metric(now.plus(Duration.ofSeconds(80)), 8, "METRIC_NAME=Write Bytes");
 		definedMetric.updateStore(store, metric);
-		assertFalse(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).isPresent());
+		assertTrue(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).isPresent());
+		assertTrue(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsException().isPresent());
 	}
 	
 	@Test

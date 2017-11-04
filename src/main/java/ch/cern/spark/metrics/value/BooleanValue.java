@@ -16,13 +16,27 @@ public class BooleanValue extends Value {
 	public Optional<Boolean> getAsBoolean() {
 		return Optional.of(booleanValue);
 	}
-	
+
 	@Override
-	public int compareTo(Value other) {
-		if(other.getAsBoolean().isPresent())
-			return booleanValue == other.getAsBoolean().get() ? 0 : -1;
-		
-		return Integer.MIN_VALUE;
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (booleanValue ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BooleanValue other = (BooleanValue) obj;
+		if (booleanValue != other.booleanValue)
+			return false;
+		return true;
 	}
 
 	public static BooleanValue from(String value_string) {

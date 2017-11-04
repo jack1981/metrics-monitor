@@ -14,6 +14,7 @@ import ch.cern.spark.metrics.results.AnalysisResult;
 import ch.cern.spark.metrics.results.AnalysisResult.Status;
 import ch.cern.spark.metrics.store.HasStore;
 import ch.cern.spark.metrics.store.Store;
+import ch.cern.spark.metrics.value.FloatValue;
 
 @RegisterComponent("percentile")
 public class PercentileAnalysis extends NumericAnalysis implements HasStore{
@@ -102,7 +103,7 @@ public class PercentileAnalysis extends NumericAnalysis implements HasStore{
         
         DescriptiveStatistics stats = history.getStatistics();
 
-        history.add(timestamp, (float) value);
+        history.add(timestamp, new FloatValue(value));
         
         if(history.size() < 5)
             return AnalysisResult.buildWithStatus(Status.EXCEPTION, "Not enought historic data (min 5 points)");
