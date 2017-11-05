@@ -1,6 +1,9 @@
 package ch.cern.spark.metrics.value;
 
+import java.time.Instant;
 import java.util.Optional;
+
+import ch.cern.spark.metrics.defined.DefinedMetricStore;
 
 public class FloatValue extends Value {
 
@@ -15,10 +18,15 @@ public class FloatValue extends Value {
 	public FloatValue(double value) {
 		this.floatValue = (float) value;
 	}
+	
+	@Override
+	public Value compute(DefinedMetricStore store, Instant time) {
+		return new FloatValue(floatValue);
+	}
 
 	@Override
 	public Optional<Float> getAsFloat() {
-		return Optional.of(floatValue);
+		return Optional.of(this.floatValue);
 	}
 
 	@Override
@@ -51,5 +59,5 @@ public class FloatValue extends Value {
 	public String toString() {
 		return Float.toString(floatValue);
 	}
-
+	
 }

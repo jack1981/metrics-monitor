@@ -1,4 +1,4 @@
-package ch.cern.spark.metrics.defined;
+package ch.cern.spark.metrics.defined.equation.var;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -11,13 +11,16 @@ import org.junit.Test;
 
 import ch.cern.properties.ConfigurationException;
 import ch.cern.properties.Properties;
+import ch.cern.spark.metrics.defined.DefinedMetricStore;
+import ch.cern.spark.metrics.defined.equation.ComputationException;
+import ch.cern.spark.metrics.defined.equation.var.FloatMetricVariable;
 import ch.cern.spark.metrics.value.Value;
 
-public class VariableTest {
+public class FloatMetricVariableTest {
 
 	@Test
-	public void countAggreagtion() throws ConfigurationException {
-		Variable variable = new Variable("name");
+	public void countAggreagtion() throws ConfigurationException, ComputationException {
+		FloatMetricVariable variable = new FloatMetricVariable("name");
 		Properties properties = new Properties();
 		properties.setProperty("aggregate", "count");
 		variable.config(properties);
@@ -43,8 +46,8 @@ public class VariableTest {
 	}
 	
 	@Test
-	public void diffAggreagtion() throws ConfigurationException {
-		Variable variable = new Variable("name");
+	public void diffAggreagtion() throws ConfigurationException, ComputationException {
+		FloatMetricVariable variable = new FloatMetricVariable("name");
 		Properties properties = new Properties();
 		properties.setProperty("aggregate", "diff");
 		variable.config(properties);
@@ -74,11 +77,11 @@ public class VariableTest {
 	}
 	
 	@Test
-	public void weightedAverageAggreagtion() throws ConfigurationException {
+	public void weightedAverageAggreagtion() throws ConfigurationException, ComputationException {
 		Duration period = Duration.ofSeconds(60);
         Instant currentTime = Instant.now();
         
-		Variable variable = new Variable("name");
+        FloatMetricVariable variable = new FloatMetricVariable("name");
 		Properties properties = new Properties();
 		properties.setProperty("aggregate", "weighted_avg");
 		properties.setProperty("expire", period.getSeconds() + "");
@@ -118,10 +121,10 @@ public class VariableTest {
 	}
 	
 	@Test
-	public void weightedAverageAggreagtionWithSameValue() throws ConfigurationException {
+	public void weightedAverageAggreagtionWithSameValue() throws ConfigurationException, ComputationException {
 		int period = 50;
         
-		Variable variable = new Variable("name");
+		FloatMetricVariable variable = new FloatMetricVariable("name");
 		Properties properties = new Properties();
 		properties.setProperty("aggregate", "weighted_avg");
 		properties.setProperty("expire", period + "");

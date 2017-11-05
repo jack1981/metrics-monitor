@@ -1,6 +1,10 @@
 package ch.cern.spark.metrics.value;
 
+import java.time.Instant;
 import java.util.Optional;
+
+import ch.cern.spark.metrics.defined.DefinedMetricStore;
+import ch.cern.spark.metrics.defined.equation.ComputationException;
 
 public class BooleanValue extends Value {
 
@@ -46,6 +50,11 @@ public class BooleanValue extends Value {
 	@Override
 	public String toString() {
 		return Boolean.toString(booleanValue);
+	}
+
+	@Override
+	public Value compute(DefinedMetricStore store, Instant time) throws ComputationException {
+		return new BooleanValue(booleanValue);
 	}
 
 }

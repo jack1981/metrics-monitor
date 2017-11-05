@@ -80,7 +80,7 @@ public class DefinedMetricTest {
 		metric.config(properties);
 		
 		assertEquals("A", metric.getName());
-		assertEquals(new Equation("DBCPUUsagePerSec - HostCPUUsagePerSec"), metric.getEquation());
+		assertNotNull(metric.getEquation());
 		assertNotNull(metric.getVariables().get("DBCPUUsagePerSec"));
 		assertNotNull(metric.getVariables().get("HostCPUUsagePerSec"));
 		assertEquals(new HashSet<String>(Arrays.asList("DBCPUUsagePerSec")), metric.getVariablesWhen());
@@ -104,7 +104,7 @@ public class DefinedMetricTest {
 		metric.config(properties);
 		
 		assertEquals("A", metric.getName());
-		assertEquals(new Equation("DBCPUUsagePerSec - HostCPUUsagePerSec"), metric.getEquation());
+		assertNotNull(metric.getEquation());
 		assertNotNull(metric.getVariables().get("DBCPUUsagePerSec"));
 		assertNotNull(metric.getVariables().get("HostCPUUsagePerSec"));
 		assertEquals(new HashSet<String>(Arrays.asList("DBCPUUsagePerSec")), metric.getVariablesWhen());

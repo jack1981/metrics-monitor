@@ -1,6 +1,10 @@
 package ch.cern.spark.metrics.value;
 
+import java.time.Instant;
 import java.util.Optional;
+
+import ch.cern.spark.metrics.defined.DefinedMetricStore;
+import ch.cern.spark.metrics.defined.equation.ComputationException;
 
 public class StringValue extends Value {
 
@@ -45,6 +49,11 @@ public class StringValue extends Value {
 	@Override
 	public String toString() {
 		return "\"" + stringValue + "\"";
+	}
+
+	@Override
+	public Value compute(DefinedMetricStore store, Instant time) throws ComputationException {
+		return new StringValue(stringValue);
 	}
 
 }

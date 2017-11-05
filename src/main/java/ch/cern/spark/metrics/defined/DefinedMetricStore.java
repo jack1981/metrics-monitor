@@ -32,8 +32,8 @@ public class DefinedMetricStore implements Serializable{
 		aggregateValuesForEmptyAttributes = new HashMap<>();
 	}
 
-	public void updateValue(String metricID, Value value, Instant instant) {
-		values.put(metricID, new DatedValue(instant, value));
+	public void updateValue(String variableName, Value value, Instant instant) {
+		values.put(variableName, new DatedValue(instant, value));
 	}
 	
 	public Value getValue(String name) {
