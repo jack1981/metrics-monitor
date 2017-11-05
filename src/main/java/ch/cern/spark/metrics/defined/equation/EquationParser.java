@@ -19,6 +19,7 @@ import ch.cern.spark.metrics.defined.equation.functions.num.SubFunc;
 import ch.cern.spark.metrics.defined.equation.functions.num.TanFunc;
 import ch.cern.spark.metrics.defined.equation.var.FloatMetricVariable;
 import ch.cern.spark.metrics.defined.equation.var.MetricVariable;
+import ch.cern.spark.metrics.value.BooleanValue;
 import ch.cern.spark.metrics.value.FloatValue;
 import ch.cern.spark.metrics.value.Value;
 
@@ -122,19 +123,10 @@ public class EquationParser {
             
             if(ch == '(')
             		x = parseFunction(text);
-            else {
-            		if(variableNames.contains(text)) {
-            			if(!variables.containsKey(text)) {
-            				if(typeIfMetricVariable.equals(FloatMetricVariable.class))
-            					variables.put(text, new FloatMetricVariable(text));
-            				
-            				variables.get(text).config(variablesProperties.getSubset(text));
-            			}
-            			
-            			x = variables.get(text);
-            		}else
-            			throw new ParseException("Unknown variable: " + text, pos);
-            }
+            else if(text.equals("true") || text.equals("false"))
+            		x = BooleanValue.from(text);
+            else
+            		x = parseVariable(text, typeIfMetricVariable);
         } else {
             throw new ParseException("Unexpected: " + (char)ch, pos);
         }
@@ -144,6 +136,20 @@ public class EquationParser {
 
         return x;
     }
+
+	private Computable<? extends Value> parseVariable(String text, Class<? extends MetricVariable<?>> typeIfMetricVariable) throws ConfigurationException, ParseException {
+		if(variableNames.contains(text)) {
+			if(!variables.containsKey(text)) {
+				if(typeIfMetricVariable.equals(FloatMetricVariable.class))
+					variables.put(text, new FloatMetricVariable(text));
+				
+				variables.get(text).config(variablesProperties.getSubset(text));
+			}
+			
+			return variables.get(text);
+		}else
+			throw new ParseException("Unknown variable: " + text, pos);
+	}
 
 	private Computable<? extends Value> parseFunction(String func) throws ParseException, ConfigurationException {
 		Computable<? extends Value> x = parseFactor(FloatMetricVariable.class);

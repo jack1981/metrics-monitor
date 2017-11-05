@@ -11,7 +11,6 @@ import ch.cern.spark.metrics.defined.DefinedMetricStore;
 import ch.cern.spark.metrics.defined.equation.Computable;
 import ch.cern.spark.metrics.defined.equation.ComputationException;
 import ch.cern.spark.metrics.filter.MetricsFilter;
-import ch.cern.spark.metrics.value.ExceptionValue;
 import ch.cern.spark.metrics.value.Value;
 
 public abstract class MetricVariable<T extends Value> implements Computable<T>, Predicate<Metric> {
@@ -48,13 +47,12 @@ public abstract class MetricVariable<T extends Value> implements Computable<T>, 
 
 	public abstract void updateStore(DefinedMetricStore store, Metric metric);
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public T compute(DefinedMetricStore store, Instant time) throws ComputationException{
 		try {
 			return computeValue(store, time);
 		}catch(ComputationException e) {
-			return (T) new ExceptionValue("MetricVariable (name: " + name + "): " + e.getMessage());
+			throw new ComputationException("MetricVariable (name: " + name + "): " + e.getMessage());
 		}
 	}
 	

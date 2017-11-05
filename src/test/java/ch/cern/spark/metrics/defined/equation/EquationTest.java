@@ -1,4 +1,4 @@
-package ch.cern.spark.metrics.defined;
+package ch.cern.spark.metrics.defined.equation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import ch.cern.properties.ConfigurationException;
 import ch.cern.properties.Properties;
+import ch.cern.spark.metrics.defined.DefinedMetricStore;
 import ch.cern.spark.metrics.defined.equation.Equation;
 import ch.cern.spark.metrics.value.FloatValue;
 
@@ -32,7 +33,7 @@ public class EquationTest {
 		DefinedMetricStore store = new DefinedMetricStore();;
 	
 		store.updateValue("x", new FloatValue(10), time);
-		assertEquals(30f, new Equation("(5+x)*2", props).compute(store, time).getAsFloat().get(), 0.000f);
+		assertEquals(30f, new Equation("(5+true)*2", props).compute(store, time).getAsFloat().get(), 0.000f);
 		
 		store.updateValue("var1", new FloatValue(3), time);	
 		assertEquals(39f, new Equation("(var1+10) * (var1)", props).compute(store, time).getAsFloat().get(), 0.000f);
