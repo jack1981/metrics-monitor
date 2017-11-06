@@ -333,11 +333,12 @@ public class DefinedMetricTest {
 		DefinedMetricStore store = new DefinedMetricStore();;
 		
 		Instant now = Instant.now();
-		
+	
 		Metric metric = Metric(now, 10, "METRIC_NAME=Read Bytes");
 		definedMetric.updateStore(store, metric);
 		assertTrue(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).isPresent());
-		assertTrue(definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsException().isPresent());
+		assertEquals("MetricVariable (name: writebytestotal): There is no value", 
+				definedMetric.generateByUpdate(store, metric, new HashMap<String, String>()).get().getValue().getAsException().get());
 		
 		metric = Metric(now.plus(Duration.ofSeconds(20)), 7, "METRIC_NAME=Write Bytes");
 		definedMetric.updateStore(store, metric);

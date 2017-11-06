@@ -37,7 +37,7 @@ public class AnalysisResult implements Serializable {
     public void setAnalyzedMetric(Metric metric) {
     		if(metric.getValue().getAsException().isPresent()) {
     			this.status = Status.EXCEPTION;
-    			this.status_reason = metric.getValue().getAsException().get().getMessage();
+    			this.status_reason = metric.getValue().getAsException().get();
     		}
     			
         this.analyzed_metric = metric;

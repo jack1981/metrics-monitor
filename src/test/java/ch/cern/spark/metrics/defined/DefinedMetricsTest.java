@@ -17,6 +17,8 @@ import ch.cern.spark.metrics.Metric;
 
 public class DefinedMetricsTest extends StreamTestHelper<Metric, Metric> {
 
+	private static final long serialVersionUID = -2224810535022352025L;
+
 	@Test
 	public void shouldUpdateDefinedMetrics() throws Exception {
 		DefinedMetrics.initCache(null);

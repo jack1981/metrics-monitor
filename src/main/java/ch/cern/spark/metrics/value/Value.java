@@ -18,7 +18,7 @@ public abstract class Value implements Serializable {
 		return Optional.empty();
 	}
 	
-	public Optional<Exception> getAsException() {
+	public Optional<String> getAsException() {
 		return Optional.empty();
 	}
 

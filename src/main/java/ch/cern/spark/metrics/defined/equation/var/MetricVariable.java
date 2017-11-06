@@ -8,12 +8,13 @@ import ch.cern.properties.ConfigurationException;
 import ch.cern.properties.Properties;
 import ch.cern.spark.metrics.Metric;
 import ch.cern.spark.metrics.defined.DefinedMetricStore;
-import ch.cern.spark.metrics.defined.equation.Computable;
-import ch.cern.spark.metrics.defined.equation.ComputationException;
+import ch.cern.spark.metrics.defined.equation.ValueComputable;
 import ch.cern.spark.metrics.filter.MetricsFilter;
+import ch.cern.spark.metrics.value.ExceptionValue;
+import ch.cern.spark.metrics.value.FloatValue;
 import ch.cern.spark.metrics.value.Value;
 
-public abstract class MetricVariable<T extends Value> implements Computable<T>, Predicate<Metric> {
+public abstract class MetricVariable implements ValueComputable, Predicate<Metric> {
 
 	protected String name;
 	
@@ -29,7 +30,7 @@ public abstract class MetricVariable<T extends Value> implements Computable<T>, 
 		return name;
 	}
 
-	public MetricVariable<T> config(Properties properties) throws ConfigurationException {
+	public MetricVariable config(Properties properties) throws ConfigurationException {
 		filter = MetricsFilter.build(properties.getSubset("filter"));
 		
 		if(properties.containsKey("expire") && properties.getProperty("expire").toLowerCase().equals("never"))
@@ -48,14 +49,14 @@ public abstract class MetricVariable<T extends Value> implements Computable<T>, 
 	public abstract void updateStore(DefinedMetricStore store, Metric metric);
 
 	@Override
-	public T compute(DefinedMetricStore store, Instant time) throws ComputationException{
+	public Value compute(DefinedMetricStore store, Instant time){
 		try {
-			return computeValue(store, time);
+			return new FloatValue(computeValue(store, time));
 		}catch(ComputationException e) {
-			throw new ComputationException("MetricVariable (name: " + name + "): " + e.getMessage());
+			return new ExceptionValue("MetricVariable (name: " + name + "): " + e.getMessage());
 		}
 	}
 	
-	protected abstract T computeValue(DefinedMetricStore store, Instant time) throws ComputationException;
+	protected abstract float computeValue(DefinedMetricStore store, Instant time) throws ComputationException;
 	
 }

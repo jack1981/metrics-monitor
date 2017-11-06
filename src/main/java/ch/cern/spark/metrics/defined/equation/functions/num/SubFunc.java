@@ -2,14 +2,13 @@ package ch.cern.spark.metrics.defined.equation.functions.num;
 
 import java.text.ParseException;
 
-import ch.cern.spark.metrics.defined.equation.Computable;
-import ch.cern.spark.metrics.value.Value;
+import ch.cern.spark.metrics.defined.equation.ValueComputable;
 
 public class SubFunc extends BiNumericalFunction{
 	
 	public static char REPRESENTATION = '-';
 
-	public SubFunc(Computable<? extends Value> v1, Computable<? extends Value> v2) throws ParseException {
+	public SubFunc(ValueComputable v1, ValueComputable v2) throws ParseException {
 		super(v1, v2);
 	}
 

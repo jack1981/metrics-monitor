@@ -121,12 +121,12 @@ public class ValueHistory implements Serializable {
             long period = history.getPeriod().getSeconds();
             
             int[] times = new int[datedValues.size()];
-            float[] values = new float[datedValues.size()];
+            Value[] values = new Value[datedValues.size()];
             
             int i = 0;
             for (DatedValue value : datedValues) {
                 times[i] = (int) value.getInstant().getEpochSecond();
-//                values[i] = value.getValue();
+                values[i] = value.getValue();
                 
                 i++;
             }
@@ -141,13 +141,13 @@ public class ValueHistory implements Serializable {
             history = new ValueHistory(Duration.ofSeconds(period));
             
             int[] times = (int[]) in.readObject();
-            float[] values = (float[]) in.readObject();
+            Value[] values = (Value[]) in.readObject();
             
-//            List<DatedValue> datedValues = IntStream.range(0, times.length)
-//								            		.mapToObj(i -> new DatedValue(Instant.ofEpochSecond(times[i]), values[i]))
-//								            		.collect(Collectors.toList());
+            List<DatedValue> datedValues = IntStream.range(0, times.length)
+								            		.mapToObj(i -> new DatedValue(Instant.ofEpochSecond(times[i]), values[i]))
+								            		.collect(Collectors.toList());
             
-//            history.setDatedValues(datedValues);
+            history.setDatedValues(datedValues);
         }
         
     }

@@ -2,7 +2,6 @@ package ch.cern.spark.metrics.defined.equation.var;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -12,7 +11,6 @@ import org.junit.Test;
 import ch.cern.properties.ConfigurationException;
 import ch.cern.properties.Properties;
 import ch.cern.spark.metrics.defined.DefinedMetricStore;
-import ch.cern.spark.metrics.defined.equation.ComputationException;
 import ch.cern.spark.metrics.value.Value;
 
 public class FloatMetricVariableTest {
@@ -56,12 +54,8 @@ public class FloatMetricVariableTest {
 		Instant now = Instant.now();
 		
 		store.updateAggregatedValue("name", 0, 5f, now);
-		Value result = null;
-		try {
-			result = variable.compute(store, Instant.now());
-			
-			fail();
-		}catch(ComputationException e) {}
+		Value result = variable.compute(store, Instant.now());
+		assertTrue(result.getAsException().isPresent());
 		
 		store.updateAggregatedValue("name", 0, 10f, now.plus(Duration.ofSeconds(1)));
 		result = variable.compute(store, now.plus(Duration.ofSeconds(1)));

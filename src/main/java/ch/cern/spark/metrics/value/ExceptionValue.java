@@ -1,36 +1,39 @@
 package ch.cern.spark.metrics.value;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import ch.cern.spark.metrics.defined.DefinedMetricStore;
-import ch.cern.spark.metrics.defined.equation.Computable;
-import ch.cern.spark.metrics.defined.equation.ComputationException;
+import ch.cern.spark.metrics.defined.equation.ValueComputable;
 
-public class ExceptionValue extends Value implements Computable<ExceptionValue>{
+public class ExceptionValue extends Value implements ValueComputable{
 
 	private static final long serialVersionUID = 8938782791564766439L;
 
-	private Exception exception;
+	private String message;
 
 	public ExceptionValue(String message) {
-		this.exception = new Exception(message);
+		this.message = message;
 	}
 
-	public ExceptionValue(Exception exception) {
-		this.exception = exception;
+	public ExceptionValue(List<ExceptionValue> exceptions) {
+		message = new String();
+		
+		for (ExceptionValue exceptionValue : exceptions)
+			message += exceptionValue.message;
 	}
 
 	@Override
-	public Optional<Exception> getAsException() {
-		return Optional.of(exception);
+	public Optional<String> getAsException() {
+		return Optional.of(message);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((exception == null) ? 0 : exception.hashCode());
+		result = prime * result + ((message == null) ? 0 : message.hashCode());
 		return result;
 	}
 
@@ -43,22 +46,22 @@ public class ExceptionValue extends Value implements Computable<ExceptionValue>{
 		if (getClass() != obj.getClass())
 			return false;
 		ExceptionValue other = (ExceptionValue) obj;
-		if (exception == null) {
-			if (other.exception != null)
+		if (message == null) {
+			if (other.message != null)
 				return false;
-		} else if (!exception.equals(other.exception))
+		} else if (!message.equals(other.message))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "ExceptionValue [" + exception + "]";
+		return "ExceptionValue [" + message + "]";
 	}
 
 	@Override
-	public ExceptionValue compute(DefinedMetricStore store, Instant time) throws ComputationException {
-		return new ExceptionValue(exception);
+	public ExceptionValue compute(DefinedMetricStore store, Instant time) {
+		return new ExceptionValue(message);
 	}
 
 	@Override

@@ -6,52 +6,46 @@ import java.util.LinkedList;
 import java.util.List;
 
 import ch.cern.spark.metrics.defined.DefinedMetricStore;
-import ch.cern.spark.metrics.defined.equation.Computable;
-import ch.cern.spark.metrics.defined.equation.ComputationException;
+import ch.cern.spark.metrics.defined.equation.ValueComputable;
+import ch.cern.spark.metrics.value.ExceptionValue;
 import ch.cern.spark.metrics.value.FloatValue;
 import ch.cern.spark.metrics.value.Value;
 
-public abstract class BiNumericalFunction implements Computable<FloatValue>{
+public abstract class BiNumericalFunction implements ValueComputable{
 	
-	protected Computable<FloatValue> v1;
+	protected ValueComputable v1;
 	
-	protected Computable<FloatValue> v2;
+	protected ValueComputable v2;
 
-	public BiNumericalFunction(Computable<? extends Value> v1, Computable<? extends Value> v2) throws ParseException {
-		this.v1 = toFloatValue(v1, " as first argument");
-		this.v2 = toFloatValue(v2, " as second argument");
+	public BiNumericalFunction(ValueComputable v1, ValueComputable v2) throws ParseException {
+		checkIfFloatValue(v1, " as first argument");
+		checkIfFloatValue(v2, " as second argument");
+		
+		this.v1 = v1;
+		this.v2 = v2;
 	}
 	
-	@SuppressWarnings("unchecked")
-	private Computable<FloatValue> toFloatValue(Computable<? extends Value> input, String subix) throws ParseException {
+	private void checkIfFloatValue(ValueComputable input, String subix) throws ParseException {
 		Class<? extends Value> inputClass = input.returnType();
 		
 		if(!inputClass.equals(FloatValue.class))
 			throw new ParseException("Function " + getFunctionRepresentation() + " expects float value" + subix, 0);
-		
-		return (Computable<FloatValue>) input;
 	}
 
 	@Override
-	public FloatValue compute(DefinedMetricStore store, Instant time) throws ComputationException {
-		List<ComputationException> exceptions = new LinkedList<>();
+	public Value compute(DefinedMetricStore store, Instant time) {
+		List<ExceptionValue> exceptions = new LinkedList<>();
 		
-		FloatValue value1 = null;
-		try {
-			value1 = v1.compute(store, time);
-		} catch (ComputationException e) {
-			exceptions.add(e);
-		}
+		Value value1 = v1.compute(store, time);		
+		if(value1.getAsException().isPresent())
+			exceptions.add((ExceptionValue) value1);
 		
-		FloatValue value2 = null;
-		try {
-			value2 = v2.compute(store, time);
-		} catch (ComputationException e) {
-			exceptions.add(e);
-		}
+		Value value2 = v2.compute(store, time);
+		if(value2.getAsException().isPresent())
+			exceptions.add((ExceptionValue) value2);
 		
 		if(exceptions.size() > 0)
-			throw new ComputationException(exceptions);
+			return new ExceptionValue(exceptions);
 		
 		return new FloatValue(compute(value1.getAsFloat().get(), value2.getAsFloat().get()));
 	}

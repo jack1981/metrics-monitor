@@ -2,14 +2,13 @@ package ch.cern.spark.metrics.defined.equation.functions.num;
 
 import java.text.ParseException;
 
-import ch.cern.spark.metrics.defined.equation.Computable;
-import ch.cern.spark.metrics.value.Value;
+import ch.cern.spark.metrics.defined.equation.ValueComputable;
 
 public class AbsFunc extends NumericFunction {
 	
 	public static String REPRESENTATION = "abs";
 
-	public AbsFunc(Computable<? extends Value> v) throws ParseException {
+	public AbsFunc(ValueComputable v) throws ParseException {
 		super(v);
 	}
 

@@ -4,10 +4,9 @@ import java.time.Instant;
 import java.util.Optional;
 
 import ch.cern.spark.metrics.defined.DefinedMetricStore;
-import ch.cern.spark.metrics.defined.equation.Computable;
-import ch.cern.spark.metrics.defined.equation.ComputationException;
+import ch.cern.spark.metrics.defined.equation.ValueComputable;
 
-public class StringValue extends Value implements Computable<StringValue>{
+public class StringValue extends Value implements ValueComputable{
 
 	private static final long serialVersionUID = 6026199196915653369L;
 
@@ -53,7 +52,7 @@ public class StringValue extends Value implements Computable<StringValue>{
 	}
 
 	@Override
-	public StringValue compute(DefinedMetricStore store, Instant time) throws ComputationException {
+	public StringValue compute(DefinedMetricStore store, Instant time) {
 		return new StringValue(stringValue);
 	}
 	

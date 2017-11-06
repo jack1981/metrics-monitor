@@ -128,7 +128,7 @@ public class JSONObjectToMetricParser implements FlatMapFunction<JSONObject, Met
 	        metric_ids.put("$value_attribute", alias);
 			
 			if(timestampException != null) {
-				metrics.add(new Metric(timestamp, new ExceptionValue(timestampException), metric_ids));
+				metrics.add(new Metric(timestamp, new ExceptionValue(timestampException.getMessage()), metric_ids));
 				continue;
 			}
 			

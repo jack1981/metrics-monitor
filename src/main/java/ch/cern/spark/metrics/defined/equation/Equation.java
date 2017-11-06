@@ -9,16 +9,15 @@ import ch.cern.properties.ConfigurationException;
 import ch.cern.properties.Properties;
 import ch.cern.spark.metrics.defined.DefinedMetricStore;
 import ch.cern.spark.metrics.defined.equation.var.MetricVariable;
-import ch.cern.spark.metrics.value.ExceptionValue;
 import ch.cern.spark.metrics.value.Value;
 
-public class Equation implements Computable<Value>{
+public class Equation implements ValueComputable{
 	
 	private static EquationParser parser = new EquationParser();
 
-	private Computable<? extends Value> formula;
+	private ValueComputable formula;
 	
-	private Map<String, MetricVariable<? extends Value>> variables = new HashMap<>();
+	private Map<String, MetricVariable> variables = new HashMap<>();
 
 	public Equation(String equationString, Properties variablesProperties) throws ParseException, ConfigurationException {
 		this.formula = parser.parse(equationString, variablesProperties, variables);
@@ -26,11 +25,7 @@ public class Equation implements Computable<Value>{
 	
 	@Override
 	public Value compute(DefinedMetricStore store, Instant time) {
-		try {
-			return formula.compute(store, time);
-		} catch (ComputationException e) {
-			return new ExceptionValue(e);
-		}
+		return formula.compute(store, time);
 	}
 
 	@Override
@@ -63,7 +58,7 @@ public class Equation implements Computable<Value>{
 		return true;
 	}
 
-	public Map<String, MetricVariable<?>> getVariables() {
+	public Map<String, MetricVariable> getVariables() {
 		return variables;
 	}
 

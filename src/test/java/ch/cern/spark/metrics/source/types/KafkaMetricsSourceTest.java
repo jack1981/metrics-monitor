@@ -16,6 +16,8 @@ import ch.cern.spark.metrics.Metric;
 
 public class KafkaMetricsSourceTest extends MetricsStreamFromKafkaProvider{
 
+	private static final long serialVersionUID = 5080067774244349422L;
+
 	@Test
 	public void parse() throws Exception {
 		List<Metric> inputMetrics = new LinkedList<Metric>();

@@ -5,15 +5,15 @@ import java.time.Instant;
 import ch.cern.spark.metrics.defined.DefinedMetricStore;
 import ch.cern.spark.metrics.value.Value;
 
-public interface Computable<T extends Value> {
+public interface ValueComputable {
 
-	public T compute(DefinedMetricStore store, Instant time) throws ComputationException;
+	public Value compute(DefinedMetricStore store, Instant time);
 	
 	/**
 	 * Serves the check casting (generic types are not checked when parsing equation) 
 	 * 
 	 * @return Should be same as <T>
 	 */
-	public Class<T> returnType();
+	public Class<? extends Value> returnType();
 	
 }

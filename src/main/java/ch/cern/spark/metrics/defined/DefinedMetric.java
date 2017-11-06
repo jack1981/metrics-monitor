@@ -75,7 +75,7 @@ public class DefinedMetric implements Serializable{
 				.count() > 0;
 	}
 
-	public Map<String, MetricVariable<?>> getVariablesToUpdate(Metric metric) {
+	public Map<String, MetricVariable> getVariablesToUpdate(Metric metric) {
 		return equation.getVariables().entrySet().stream()
 				.filter(entry -> entry.getValue().test(metric))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -97,9 +97,9 @@ public class DefinedMetric implements Serializable{
 	}
 
 	public void updateStore(DefinedMetricStore store, Metric metric) {
-		Map<String, MetricVariable<?>> variablesToUpdate = getVariablesToUpdate(metric);
+		Map<String, MetricVariable> variablesToUpdate = getVariablesToUpdate(metric);
 		
-		for (MetricVariable<?> variableToUpdate : variablesToUpdate.values())
+		for (MetricVariable variableToUpdate : variablesToUpdate.values())
 			variableToUpdate.updateStore(store, metric);
 	}
 
@@ -149,7 +149,7 @@ public class DefinedMetric implements Serializable{
 		return equation;
 	}
 
-	protected Map<String, MetricVariable<?>> getVariables() {
+	protected Map<String, MetricVariable> getVariables() {
 		return equation.getVariables();
 	}
 	

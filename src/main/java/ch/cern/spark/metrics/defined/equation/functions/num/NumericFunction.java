@@ -2,37 +2,37 @@ package ch.cern.spark.metrics.defined.equation.functions.num;
 
 import java.text.ParseException;
 import java.time.Instant;
-import java.util.Optional;
 
 import ch.cern.spark.metrics.defined.DefinedMetricStore;
-import ch.cern.spark.metrics.defined.equation.Computable;
-import ch.cern.spark.metrics.defined.equation.ComputationException;
+import ch.cern.spark.metrics.defined.equation.ValueComputable;
 import ch.cern.spark.metrics.value.FloatValue;
 import ch.cern.spark.metrics.value.Value;
 
-public abstract class NumericFunction implements Computable<FloatValue>{
+public abstract class NumericFunction implements ValueComputable{
 	
-	protected Computable<FloatValue> v;
+	protected ValueComputable v;
 
-	public NumericFunction(Computable<? extends Value> v) throws ParseException {
-		this.v = toFloatValue(v);
+	public NumericFunction(ValueComputable v) throws ParseException {
+		checkIfFloatValue(v, " as input argument");
+		
+		this.v = v;
 	}
-
-	@SuppressWarnings("unchecked")
-	private Computable<FloatValue> toFloatValue(Computable<? extends Value> input) throws ParseException {
+	
+	private void checkIfFloatValue(ValueComputable input, String subix) throws ParseException {
 		Class<? extends Value> inputClass = input.returnType();
 		
 		if(!inputClass.equals(FloatValue.class))
-			throw new ParseException("Function " + getFunctionRepresentation() + " expects float value", 0);
-		
-		return (Computable<FloatValue>) input;
+			throw new ParseException("Function " + getFunctionRepresentation() + " expects float value" + subix, 0);
 	}
 
 	@Override
-	public FloatValue compute(DefinedMetricStore store, Instant time) throws ComputationException {
-		Optional<Float> value = v.compute(store, time).getAsFloat();
+	public Value compute(DefinedMetricStore store, Instant time) {
+		Value value = v.compute(store, time);		
 		
-		return new FloatValue(compute(value.get()));
+		if(value.getAsException().isPresent())
+			return value;
+		
+		return new FloatValue(compute(value.getAsFloat().get()));
 	}
 	
 	@Override

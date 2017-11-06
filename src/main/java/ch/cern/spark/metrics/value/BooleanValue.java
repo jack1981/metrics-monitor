@@ -4,10 +4,9 @@ import java.time.Instant;
 import java.util.Optional;
 
 import ch.cern.spark.metrics.defined.DefinedMetricStore;
-import ch.cern.spark.metrics.defined.equation.Computable;
-import ch.cern.spark.metrics.defined.equation.ComputationException;
+import ch.cern.spark.metrics.defined.equation.ValueComputable;
 
-public class BooleanValue extends Value implements Computable<BooleanValue>{
+public class BooleanValue extends Value implements ValueComputable{
 
 	private static final long serialVersionUID = 6026199196915653369L;
 
@@ -54,7 +53,7 @@ public class BooleanValue extends Value implements Computable<BooleanValue>{
 	}
 
 	@Override
-	public BooleanValue compute(DefinedMetricStore store, Instant time) throws ComputationException {
+	public BooleanValue compute(DefinedMetricStore store, Instant time) {
 		return new BooleanValue(booleanValue);
 	}
 

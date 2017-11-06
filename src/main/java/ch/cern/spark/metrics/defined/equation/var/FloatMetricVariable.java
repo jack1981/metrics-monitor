@@ -16,11 +16,10 @@ import ch.cern.spark.Pair;
 import ch.cern.spark.metrics.DatedValue;
 import ch.cern.spark.metrics.Metric;
 import ch.cern.spark.metrics.defined.DefinedMetricStore;
-import ch.cern.spark.metrics.defined.equation.ComputationException;
 import ch.cern.spark.metrics.value.FloatValue;
 import ch.cern.spark.metrics.value.Value;
 
-public class FloatMetricVariable extends MetricVariable<FloatValue>{
+public class FloatMetricVariable extends MetricVariable{
 	
 	public enum Operation {SUM, AVG, WEIGHTED_AVG, MIN, MAX, COUNT, DIFF};
 	protected Operation aggregateOperation;
@@ -30,7 +29,7 @@ public class FloatMetricVariable extends MetricVariable<FloatValue>{
 	}
 	
 	@Override
-	public MetricVariable<FloatValue> config(Properties properties) throws ConfigurationException {
+	public MetricVariable config(Properties properties) throws ConfigurationException {
 		super.config(properties);
 		
 		String aggregateVal = properties.getProperty("aggregate");
@@ -44,7 +43,7 @@ public class FloatMetricVariable extends MetricVariable<FloatValue>{
 		return this;
 	}
 
-	public FloatValue computeValue(DefinedMetricStore store, Instant time) throws ComputationException {
+	public float computeValue(DefinedMetricStore store, Instant time) throws ComputationException {
 		Optional<Instant> oldestUpdate = Optional.empty();
 		if(expirePeriod != null)
 			oldestUpdate = Optional.of(time.minus(expirePeriod));
@@ -56,6 +55,8 @@ public class FloatMetricVariable extends MetricVariable<FloatValue>{
 			
 			if(valOpt.getAsFloat().isPresent())
 				val = valOpt.getAsFloat().get().doubleValue();
+			else if(valOpt.getAsException().isPresent())
+				throw new ComputationException(valOpt.getAsException().get());
 			else
 				throw new ComputationException("value is not of type float.");
 		}else {
@@ -86,7 +87,7 @@ public class FloatMetricVariable extends MetricVariable<FloatValue>{
 			}
 		}
 
-		return new FloatValue(val.floatValue());
+		return val.floatValue();
 	}
 
 	private double averageAggregation(List<Value> aggregatedValues) throws ComputationException {

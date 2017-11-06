@@ -4,9 +4,9 @@ import java.time.Instant;
 import java.util.Optional;
 
 import ch.cern.spark.metrics.defined.DefinedMetricStore;
-import ch.cern.spark.metrics.defined.equation.Computable;
+import ch.cern.spark.metrics.defined.equation.ValueComputable;
 
-public class FloatValue extends Value implements Computable<FloatValue>{
+public class FloatValue extends Value implements ValueComputable{
 
 	private static final long serialVersionUID = 6026199196915653369L;
 

@@ -21,7 +21,6 @@ import ch.cern.spark.metrics.defined.equation.var.FloatMetricVariable;
 import ch.cern.spark.metrics.defined.equation.var.MetricVariable;
 import ch.cern.spark.metrics.value.BooleanValue;
 import ch.cern.spark.metrics.value.FloatValue;
-import ch.cern.spark.metrics.value.Value;
 
 public class EquationParser {
 	
@@ -31,7 +30,7 @@ public class EquationParser {
 
 	private Properties variablesProperties;
 
-	private Map<String, MetricVariable<? extends Value>> variables;
+	private Map<String, MetricVariable> variables;
 
 	private Set<String> variableNames;
 	
@@ -51,10 +50,10 @@ public class EquationParser {
         return false;
     }
 
-	public synchronized Computable<? extends Value> parse(
+	public synchronized ValueComputable parse(
 			String input, 
 			Properties variablesProperties, 
-			Map<String, MetricVariable<? extends Value>> variables) throws ParseException, ConfigurationException {
+			Map<String, MetricVariable> variables) throws ParseException, ConfigurationException {
 		
 		this.variablesProperties = variablesProperties;
 		this.variableNames = variablesProperties.getUniqueKeyFields();
@@ -66,7 +65,7 @@ public class EquationParser {
 		
         nextChar();
         
-        Computable<? extends Value> x = parseExpression();
+        ValueComputable x = parseExpression();
         
         if (pos < str.length()) 
         		throw new ParseException("Unexpected: " + (char)ch, pos);
@@ -79,8 +78,8 @@ public class EquationParser {
     // term = factor | term `*` factor | term `/` factor
     // factor = `+` factor | `-` factor | `(` expression `)` | number | functionName factor | factor `^` factor
 
-	private Computable<? extends Value> parseExpression() throws ParseException, ConfigurationException {
-    		Computable<? extends Value> x = parseTerm();
+	private ValueComputable parseExpression() throws ParseException, ConfigurationException {
+    		ValueComputable x = parseTerm();
         for (;;) {
             if      (eat(AddFunc.REPRESENTATION)) x = new AddFunc(x, parseTerm());
             else if (eat(SubFunc.REPRESENTATION)) x = new SubFunc(x, parseTerm());
@@ -88,8 +87,8 @@ public class EquationParser {
         }
     }
 
-	private Computable<? extends Value> parseTerm() throws ParseException, ConfigurationException {
-    		Computable<? extends Value> x = parseFactor(FloatMetricVariable.class);
+	private ValueComputable parseTerm() throws ParseException, ConfigurationException {
+    		ValueComputable x = parseFactor(FloatMetricVariable.class);
         for (;;) {
             if      (eat('*')) x = new MultiFunc(x, parseFactor(FloatMetricVariable.class));
             else if (eat('/')) x = new DivFunc(x, parseFactor(FloatMetricVariable.class));
@@ -97,7 +96,7 @@ public class EquationParser {
         }
     }
 
-	private Computable<? extends Value> parseFactor(Class<? extends MetricVariable<?>> typeIfMetricVariable) 
+	private ValueComputable parseFactor(Class<? extends MetricVariable> typeIfMetricVariable) 
 			throws ParseException, ConfigurationException {
 		
         if (eat('+')) 
@@ -105,7 +104,7 @@ public class EquationParser {
         if (eat(MinusFunc.REPRESENTATION)) 
         		return new MinusFunc(parseFactor(FloatMetricVariable.class)); // unary minus
 
-        Computable<? extends Value> x;
+        ValueComputable x;
         int startPos = this.pos;
         if (eat('(')) { // parentheses
             x = parseExpression();
@@ -137,7 +136,7 @@ public class EquationParser {
         return x;
     }
 
-	private Computable<? extends Value> parseVariable(String text, Class<? extends MetricVariable<?>> typeIfMetricVariable) throws ConfigurationException, ParseException {
+	private ValueComputable parseVariable(String text, Class<? extends MetricVariable> typeIfMetricVariable) throws ConfigurationException, ParseException {
 		if(variableNames.contains(text)) {
 			if(!variables.containsKey(text)) {
 				if(typeIfMetricVariable.equals(FloatMetricVariable.class))
@@ -151,8 +150,8 @@ public class EquationParser {
 			throw new ParseException("Unknown variable: " + text, pos);
 	}
 
-	private Computable<? extends Value> parseFunction(String func) throws ParseException, ConfigurationException {
-		Computable<? extends Value> x = parseFactor(FloatMetricVariable.class);
+	private ValueComputable parseFunction(String func) throws ParseException, ConfigurationException {
+		ValueComputable x = parseFactor(FloatMetricVariable.class);
 		
         if (func.equals(SqrtFunc.REPRESENTATION)) x = new SqrtFunc(x);
         else if (func.equals(SinFunc.REPRESENTATION)) x = new SinFunc(x);
