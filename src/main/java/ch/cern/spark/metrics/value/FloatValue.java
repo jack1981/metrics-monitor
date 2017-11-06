@@ -59,5 +59,10 @@ public class FloatValue extends Value {
 	public String toString() {
 		return Float.toString(floatValue);
 	}
+
+	@Override
+	public Class<? extends Value> returnType() {
+		return this.getClass();
+	}
 	
 }

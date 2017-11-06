@@ -187,5 +187,10 @@ public class FloatMetricVariable extends MetricVariable<FloatValue>{
 		else
 			store.updateAggregatedValue(name, metric.getIDs().hashCode(), metric.getValue(), metric.getInstant());
 	}
+
+	@Override
+	public Class<FloatValue> returnType() {
+		return FloatValue.class;
+	}
 	
 }

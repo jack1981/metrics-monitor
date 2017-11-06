@@ -19,12 +19,13 @@ public abstract class NumericFunction implements Computable<FloatValue>{
 	}
 
 	@SuppressWarnings("unchecked")
-	private Computable<FloatValue> toFloatValue(Computable<? extends Value> v) throws ParseException {
-		try{
-			return (Computable<FloatValue>) v;
-		}catch(ClassCastException e) {
-			throw new ParseException("Function " + getFunctionRepresentation() + " expects float value.", 0);
-		}
+	private Computable<FloatValue> toFloatValue(Computable<? extends Value> input) throws ParseException {
+		Class<? extends Value> inputClass = input.returnType();
+		
+		if(!inputClass.equals(FloatValue.class))
+			throw new ParseException("Function " + getFunctionRepresentation() + " expects float value", 0);
+		
+		return (Computable<FloatValue>) input;
 	}
 
 	@Override
@@ -32,6 +33,11 @@ public abstract class NumericFunction implements Computable<FloatValue>{
 		Optional<Float> value = v.compute(store, time).getAsFloat();
 		
 		return new FloatValue(compute(value.get()));
+	}
+	
+	@Override
+	public Class<? extends Value> returnType() {
+		return FloatValue.class;
 	}
 
 	public abstract String getFunctionRepresentation();

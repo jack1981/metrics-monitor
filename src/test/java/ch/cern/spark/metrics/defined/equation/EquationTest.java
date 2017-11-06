@@ -33,7 +33,7 @@ public class EquationTest {
 		DefinedMetricStore store = new DefinedMetricStore();;
 	
 		store.updateValue("x", new FloatValue(10), time);
-		assertEquals(30f, new Equation("(5+true)*2", props).compute(store, time).getAsFloat().get(), 0.000f);
+		assertEquals(30f, new Equation("(5+10)*2", props).compute(store, time).getAsFloat().get(), 0.000f);
 		
 		store.updateValue("var1", new FloatValue(3), time);	
 		assertEquals(39f, new Equation("(var1+10) * (var1)", props).compute(store, time).getAsFloat().get(), 0.000f);

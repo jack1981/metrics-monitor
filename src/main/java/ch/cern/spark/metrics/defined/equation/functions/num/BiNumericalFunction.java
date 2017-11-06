@@ -23,12 +23,13 @@ public abstract class BiNumericalFunction implements Computable<FloatValue>{
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Computable<FloatValue> toFloatValue(Computable<? extends Value> v, String subix) throws ParseException {
-		try{
-			return (Computable<FloatValue>) v;
-		}catch(ClassCastException e) {
+	private Computable<FloatValue> toFloatValue(Computable<? extends Value> input, String subix) throws ParseException {
+		Class<? extends Value> inputClass = input.returnType();
+		
+		if(!inputClass.equals(FloatValue.class))
 			throw new ParseException("Function " + getFunctionRepresentation() + " expects float value" + subix, 0);
-		}
+		
+		return (Computable<FloatValue>) input;
 	}
 
 	@Override
@@ -53,6 +54,11 @@ public abstract class BiNumericalFunction implements Computable<FloatValue>{
 			throw new ComputationException(exceptions);
 		
 		return new FloatValue(compute(value1.getAsFloat().get(), value2.getAsFloat().get()));
+	}
+
+	@Override
+	public Class<? extends Value> returnType() {
+		return FloatValue.class;
 	}
 	
 	public abstract String getFunctionRepresentation();

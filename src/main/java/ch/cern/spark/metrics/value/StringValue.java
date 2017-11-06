@@ -55,5 +55,10 @@ public class StringValue extends Value {
 	public Value compute(DefinedMetricStore store, Instant time) throws ComputationException {
 		return new StringValue(stringValue);
 	}
+	
+	@Override
+	public Class<? extends Value> returnType() {
+		return this.getClass();
+	}
 
 }

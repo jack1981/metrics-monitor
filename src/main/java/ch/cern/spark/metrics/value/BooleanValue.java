@@ -57,4 +57,9 @@ public class BooleanValue extends Value {
 		return new BooleanValue(booleanValue);
 	}
 
+	@Override
+	public Class<? extends Value> returnType() {
+		return this.getClass();
+	}
+
 }

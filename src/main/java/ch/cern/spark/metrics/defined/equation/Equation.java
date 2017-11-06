@@ -67,4 +67,9 @@ public class Equation implements Computable<Value>{
 		return variables;
 	}
 
+	@Override
+	public Class<? extends Value> returnType() {
+		return Value.class;
+	}
+
 }

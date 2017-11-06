@@ -60,4 +60,9 @@ public class ExceptionValue extends Value {
 		return new ExceptionValue(exception);
 	}
 
+	@Override
+	public Class<? extends Value> returnType() {
+		return this.getClass();
+	}
+
 }
