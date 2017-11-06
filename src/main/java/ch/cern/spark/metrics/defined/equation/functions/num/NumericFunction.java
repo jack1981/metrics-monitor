@@ -36,7 +36,7 @@ public abstract class NumericFunction implements Computable<FloatValue>{
 	}
 	
 	@Override
-	public Class<? extends Value> returnType() {
+	public Class<FloatValue> returnType() {
 		return FloatValue.class;
 	}
 

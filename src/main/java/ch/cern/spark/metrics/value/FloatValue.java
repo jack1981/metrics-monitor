@@ -4,8 +4,9 @@ import java.time.Instant;
 import java.util.Optional;
 
 import ch.cern.spark.metrics.defined.DefinedMetricStore;
+import ch.cern.spark.metrics.defined.equation.Computable;
 
-public class FloatValue extends Value {
+public class FloatValue extends Value implements Computable<FloatValue>{
 
 	private static final long serialVersionUID = 6026199196915653369L;
 
@@ -20,7 +21,7 @@ public class FloatValue extends Value {
 	}
 	
 	@Override
-	public Value compute(DefinedMetricStore store, Instant time) {
+	public FloatValue compute(DefinedMetricStore store, Instant time) {
 		return new FloatValue(floatValue);
 	}
 
@@ -61,8 +62,8 @@ public class FloatValue extends Value {
 	}
 
 	@Override
-	public Class<? extends Value> returnType() {
-		return this.getClass();
+	public Class<FloatValue> returnType() {
+		return FloatValue.class;
 	}
 	
 }

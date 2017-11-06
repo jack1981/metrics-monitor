@@ -4,9 +4,10 @@ import java.time.Instant;
 import java.util.Optional;
 
 import ch.cern.spark.metrics.defined.DefinedMetricStore;
+import ch.cern.spark.metrics.defined.equation.Computable;
 import ch.cern.spark.metrics.defined.equation.ComputationException;
 
-public class ExceptionValue extends Value {
+public class ExceptionValue extends Value implements Computable<ExceptionValue>{
 
 	private static final long serialVersionUID = 8938782791564766439L;
 
@@ -56,13 +57,13 @@ public class ExceptionValue extends Value {
 	}
 
 	@Override
-	public Value compute(DefinedMetricStore store, Instant time) throws ComputationException {
+	public ExceptionValue compute(DefinedMetricStore store, Instant time) throws ComputationException {
 		return new ExceptionValue(exception);
 	}
 
 	@Override
-	public Class<? extends Value> returnType() {
-		return this.getClass();
+	public Class<ExceptionValue> returnType() {
+		return ExceptionValue.class;
 	}
 
 }
