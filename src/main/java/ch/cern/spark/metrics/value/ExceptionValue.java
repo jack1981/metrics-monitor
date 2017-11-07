@@ -1,7 +1,6 @@
 package ch.cern.spark.metrics.value;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 import ch.cern.spark.metrics.defined.DefinedMetricStore;
@@ -15,19 +14,6 @@ public class ExceptionValue extends Value implements ValueComputable{
 
 	public ExceptionValue(String message) {
 		this.message = message;
-	}
-
-	public ExceptionValue(List<ExceptionValue> exceptions) {
-		if(exceptions.size() == 1) {
-			message = exceptions.get(0).getAsException().get();
-			
-			return;
-		}
-		
-		message = "Several exceptions: (";
-		for (ExceptionValue exceptionValue : exceptions)
-			message += exceptionValue.message + " ";
-		message += ")";
 	}
 
 	@Override

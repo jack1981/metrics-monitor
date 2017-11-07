@@ -71,19 +71,19 @@ public class BiNumericFunctionTest {
 		BiNumericFunctionImp func = new BiNumericFunctionImp(stringValue, floatValue);
 		Value result = func.compute(null, null);
 		assertTrue(result.getAsException().isPresent());
-		assertEquals("first argument: received value is not float.", result.getAsException().get());
+		assertEquals("Function \"testFunc\": (first argument: received value is not float. )", result.getAsException().get());
 		
 		func = new BiNumericFunctionImp(floatValue, stringValue);
 		result = func.compute(null, null);
 		assertTrue(result.getAsException().isPresent());
-		assertEquals("second argument: received value is not float.", result.getAsException().get());
+		assertEquals("Function \"testFunc\": (second argument: received value is not float.)", result.getAsException().get());
 		
 		func = new BiNumericFunctionImp(stringValue, stringValue);
 		result = func.compute(null, null);
 		assertTrue(result.getAsException().isPresent());
-		assertEquals("Several exceptions: ("
+		assertEquals("Function \"testFunc\": ("
 						+ "first argument: received value is not float. "
-						+ "second argument: received value is not float. )", result.getAsException().get());
+						+ "second argument: received value is not float.)", result.getAsException().get());
 	}
 	
 	@Test
@@ -117,19 +117,19 @@ public class BiNumericFunctionTest {
 		BiNumericFunctionImp func = new BiNumericFunctionImp(exceptionValue, floatValue);
 		Value result = func.compute(null, null);
 		assertTrue(result.getAsException().isPresent());
-		assertEquals("first argument: exception message.", result.getAsException().get());
+		assertEquals("Function \"testFunc\": (first argument: exception message. )", result.getAsException().get());
 		
 		func = new BiNumericFunctionImp(floatValue, exceptionValue);
 		result = func.compute(null, null);
 		assertTrue(result.getAsException().isPresent());
-		assertEquals("second argument: exception message.", result.getAsException().get());
+		assertEquals("Function \"testFunc\": (second argument: exception message.)", result.getAsException().get());
 		
 		func = new BiNumericFunctionImp(exceptionValue, exceptionValue);
 		result = func.compute(null, null);
 		assertTrue(result.getAsException().isPresent());
-		assertEquals("Several exceptions: ("
+		assertEquals("Function \"testFunc\": ("
 						+ "first argument: exception message. "
-						+ "second argument: exception message. )", result.getAsException().get());
+						+ "second argument: exception message.)", result.getAsException().get());
 	}
 	
 	@Test
@@ -163,9 +163,9 @@ public class BiNumericFunctionTest {
 		BiNumericFunctionImp func = new BiNumericFunctionImp(exceptionValue, stringValue);
 		Value result = func.compute(null, null);
 		assertTrue(result.getAsException().isPresent());
-		assertEquals("Several exceptions: ("
+		assertEquals("Function \"testFunc\": ("
 						+ "first argument: exception message. "
-						+ "second argument: received value is not float. )", result.getAsException().get());
+						+ "second argument: received value is not float.)", result.getAsException().get());
 	}
 	
 	private static class BiNumericFunctionImp extends BiNumericFunction{
@@ -176,7 +176,7 @@ public class BiNumericFunctionTest {
 
 		@Override
 		public String getFunctionRepresentation() {
-			return null;
+			return "testFunc";
 		}
 
 		@Override
