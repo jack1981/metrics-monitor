@@ -4,7 +4,7 @@ import java.text.ParseException;
 
 import ch.cern.spark.metrics.defined.equation.ValueComputable;
 
-public class DivFunc extends BiNumericalFunction{
+public class DivFunc extends BiNumericFunction{
 	
 	public static char REPRESENTATION = '/';
 

@@ -18,10 +18,16 @@ public class ExceptionValue extends Value implements ValueComputable{
 	}
 
 	public ExceptionValue(List<ExceptionValue> exceptions) {
-		message = new String();
+		if(exceptions.size() == 1) {
+			message = exceptions.get(0).getAsException().get();
+			
+			return;
+		}
 		
+		message = "Several exceptions: (";
 		for (ExceptionValue exceptionValue : exceptions)
-			message += exceptionValue.message;
+			message += exceptionValue.message + " ";
+		message += ")";
 	}
 
 	@Override

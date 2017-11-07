@@ -4,7 +4,7 @@ import java.text.ParseException;
 
 import ch.cern.spark.metrics.defined.equation.ValueComputable;
 
-public class PowFunc extends BiNumericalFunction{
+public class PowFunc extends BiNumericFunction{
 	
 	public static char REPRESENTATION = '^';
 

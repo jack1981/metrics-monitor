@@ -4,7 +4,7 @@ import java.text.ParseException;
 
 import ch.cern.spark.metrics.defined.equation.ValueComputable;
 
-public class SubFunc extends BiNumericalFunction{
+public class SubFunc extends BiNumericFunction{
 	
 	public static char REPRESENTATION = '-';
 

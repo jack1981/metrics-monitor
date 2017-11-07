@@ -4,7 +4,7 @@ import java.text.ParseException;
 
 import ch.cern.spark.metrics.defined.equation.ValueComputable;
 
-public class AddFunc extends BiNumericalFunction{
+public class AddFunc extends BiNumericFunction{
 	
 	public static char REPRESENTATION = '+';
 

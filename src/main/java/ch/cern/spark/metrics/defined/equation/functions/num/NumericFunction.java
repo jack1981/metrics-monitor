@@ -2,9 +2,11 @@ package ch.cern.spark.metrics.defined.equation.functions.num;
 
 import java.text.ParseException;
 import java.time.Instant;
+import java.util.Optional;
 
 import ch.cern.spark.metrics.defined.DefinedMetricStore;
 import ch.cern.spark.metrics.defined.equation.ValueComputable;
+import ch.cern.spark.metrics.value.ExceptionValue;
 import ch.cern.spark.metrics.value.FloatValue;
 import ch.cern.spark.metrics.value.Value;
 
@@ -32,7 +34,11 @@ public abstract class NumericFunction implements ValueComputable{
 		if(value.getAsException().isPresent())
 			return value;
 		
-		return new FloatValue(compute(value.getAsFloat().get()));
+		Optional<Float> floatOption = value.getAsFloat();
+		if(!floatOption.isPresent())
+			return new ExceptionValue("received value is not float.");
+		
+		return new FloatValue(compute(floatOption.get()));
 	}
 	
 	@Override
